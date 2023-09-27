@@ -36,3 +36,53 @@
     transform: rotate(360deg);
   }
 }
+/* App.css */
+
+/* Reset default margin and padding */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/* Container for the headline, textarea, and button */
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Style for the headline */
+.headline {
+  padding: 20px;
+  background-color: #f5f5f5; /* Light gray background */
+  text-align: center;
+  font-size: 24px; /* Set font size */
+  font-weight: bold; /* Bold text */
+}
+
+/* Style the textarea */
+textarea {
+  flex: 1; /* Allow textarea to take up remaining space */
+  border: none;
+  outline: none;
+  resize: none;
+  box-sizing: border-box;
+  padding: 20px;
+  font-size: 16px;
+  font-family: Arial, sans-serif;
+}
+
+/* Style the button */
+button {
+  width: 100%;
+  padding: 15px 0; /* Vertical padding */
+  background-color: #007BFF; /* Blue background */
+  color: white; /* White text */
+  border: none;
+  cursor: pointer; /* Hand cursor on hover */
+  position: fixed; /* Fix position to bottom */
+  bottom: 0; /* Align to bottom */
+  left: 0; /* Align to left */
+}
