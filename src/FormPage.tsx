@@ -18,7 +18,7 @@ function FormPage() {
 
   return (
     <div className="form-wrapper">
-      <h1>Multi-Modal [M]ediator for [I]nterloclative [N]oxiousness and [G]rienvences</h1>
+      <h1>Claridad.ai</h1>
       <textarea
         onChange={(e) => setText(e.target.value)}
         value={text}
@@ -27,6 +27,7 @@ function FormPage() {
       <button onClick={() => setShowModal(true)}>Fetch Conversation</button>
       {showModal && (
         <FetchConversationModal
+          isOpen={showModal}
           onClose={() => setShowModal(false)}
           onFetchConversation={handleFetchConversation}
         />
