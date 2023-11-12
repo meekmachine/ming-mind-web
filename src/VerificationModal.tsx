@@ -21,7 +21,7 @@ const VerificationModal: React.FC<VerificationModalProps> = ({ text, isOpen, onC
     setLoading(true);
     setVerificationResult({ status: '', message: '' }); // Reset verification result
     try {
-      const response = await axios.post('http://localhost:8000/verify-conversation', { text });
+      const response = await axios.post('http://localhost:8000/is-mingable', { text });
       setVerificationResult(response.data);
       if (response.data.status === 'success') {
         onVerified();
