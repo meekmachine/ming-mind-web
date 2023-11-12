@@ -1,70 +1,53 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-function VerificationModal({ text, isOpen, onClose, onVerified }: { text: string, isOpen: boolean, onClose: () => void, onVerified: () => void }) {
+interface VerificationModalProps {
+    text: string;
+    isOpen: boolean;
+    onClose: () => void;
+    onVerified: () => void;
+}
+const VerificationModal: React.FC<VerificationModalProps> = ({ text, isOpen, onClose, onVerified }) => {
+    const [loading, setLoading] = useState(false);
+    const [verificationResult, setVerificationResult] = useState({ status: '', message: '' });
 
-    function VerificationModal({ text, isOpen, onClose, onVerified }: { text: string, isOpen: boolean, onClose: () => void, onVerified: () => void }) {
-        const [loading, setLoading] = useState(false);
-        const [verificationResult, setVerificationResult] = useState<{ status: string, message: string } | null>(null);
-
-        const verifyConversation = async () => {
-            setLoading(true);
-            try {
-                const response = await axios.post('http://localhost:8000/verify-conversation', { text });
-                setVerificationResult(response.data);
-                if (response.data.status === 'success') {
-                    onVerified();
-                }
-            } catch (error) {
-                console.error('Error verifying conversation:', error);
-                setVerificationResult({ status: 'error', message: 'Failed to verify the conversation.' });
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        useEffect(() => {
-            if (isOpen && text) {
-                verifyConversation();
-            }
-        }, [isOpen, text]);
-
-        if (!isOpen) return null;
-
-        return (
-            <div className="modal">
-                {loading ? (
-                    <p>Verifying the conversation...</p>
-                ) : (
-                    <div>
-                        <p>{verificationResult?.message}</p>
-                        <button onClick={onClose}>Close</button>
-                    </div>
-                )}
-            </div>
-        );
-    }
-
-    export default VerificationModal;
-            setLoading(false);
+    useEffect(() => {
+        if (isOpen && text) {
+            verifyConversation();
         }
-    };
+    }, [isOpen, text]);
 
+  const verifyConversation = async () => {
+    setLoading(true);
+    setVerificationResult({ status: '', message: '' }); // Reset verification result
+    try {
+      const response = await axios.post('http://localhost:8000/verify-conversation', { text });
+      setVerificationResult(response.data);
+      if (response.data.status === 'success') {
+        onVerified();
+      }
+    } catch (error) {
+      console.error('Error verifying conversation:', error);
+      setVerificationResult({ status: 'error', message: 'Failed to verify the conversation.' });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    if (!isOpen) return null;
+  if (!isOpen) return null;
 
-    return (
-        <div className="modal">
-            {loading ? (
-                <p>Verifying the conversation...</p>
-            ) : (
-                <div>
-                    <p>{verificationResult?.message}</p>
-                    <button onClick={onClose}>Close</button>
-                </div>
-            )}
+  return (
+    <div className="modal">
+      {loading ? (
+        <p>Verifying the conversation...</p>
+      ) : (
+        <div>
+          <p>{verificationResult.message}</p>
+          <button onClick={onClose}>Close</button>
         </div>
-    );
+      )}
+    </div>
+  );
 }
 
 export default VerificationModal;
