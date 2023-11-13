@@ -7,6 +7,7 @@ interface VerificationModalProps {
     onClose: () => void;
     onVerified: () => void;
 }
+
 const VerificationModal: React.FC<VerificationModalProps> = ({ text, isOpen, onClose, onVerified }) => {
     const [loading, setLoading] = useState(false);
     const [verificationResult, setVerificationResult] = useState({ status: '', message: '' });
@@ -17,37 +18,43 @@ const VerificationModal: React.FC<VerificationModalProps> = ({ text, isOpen, onC
         }
     }, [isOpen, text]);
 
-  const verifyConversation = async () => {
-    setLoading(true);
-    setVerificationResult({ status: '', message: '' }); // Reset verification result
-    try {
-      const response = await axios.post('http://localhost:8000/is-mingable', { text });
-      setVerificationResult(response.data);
-      if (response.data.status === 'success') {
-        onVerified();
-      }
-    } catch (error) {
-      console.error('Error verifying conversation:', error);
-      setVerificationResult({ status: 'error', message: 'Failed to verify the conversation.' });
-    } finally {
-      setLoading(false);
-    }
-  };
+    const verifyConversation = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.post('http://localhost:8000/is-mingable', { text });
+            if (response.data.valid === 1) {
+              setVerificationResult({ status: 'success', message: 'The conversation is mingable!' });
+                onVerified();
+            } else {
+              setVerificationResult({ status: 'error', message: 'Error: Validation failed. Reason: Content is not MINGable' });
+            }
+        } catch (error) {
+            console.error('Error verifying conversation:', error);
+            setVerificationResult({ status: 'error', message: 'Failed to verify the conversation.' });
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  if (!isOpen) return null;
+    const handleClose = () => {
+        setVerificationResult({ status: '', message: '' }); // Reset verification result on close
+        onClose();
+    };
 
-  return (
-    <div className="modal">
-      {loading ? (
-        <p>Verifying the conversation...</p>
-      ) : (
-        <div>
-          <p>{verificationResult.message}</p>
-          <button onClick={onClose}>Close</button>
+    if (!isOpen) return null;
+
+    return (
+        <div className="modal">
+            {loading ? (
+                <p>Verifying the conversation...</p>
+            ) : (
+                <div>
+                    <p>{verificationResult.message}</p>
+                    <button onClick={handleClose}>Close</button>
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 }
 
 export default VerificationModal;

@@ -4,7 +4,7 @@ import axios from 'axios';
 type FetchConversationModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onFetchConversation: (conversation: string) => void;
+  onFetchConversation: (conversation: { text: string, json: any }) => void;
 };
 
 function FetchConversationModal({ isOpen, onClose, onFetchConversation }: FetchConversationModalProps) {
@@ -22,7 +22,7 @@ function FetchConversationModal({ isOpen, onClose, onFetchConversation }: FetchC
         }
       });
       const formattedConversation = formatConversation(response.data);
-      onFetchConversation(formattedConversation);
+      onFetchConversation({ text: formattedConversation, json: response.data });
     } catch (error) {
       console.error('Error fetching conversation:', error);
     }
