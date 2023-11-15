@@ -1,88 +1,67 @@
-.App {
-  text-align: center;
-}
+/* reset.css */
+/* CSS reset or normalization rules */
+/* Example reset code for common styles */
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-/* App.css */
-
-/* Reset default margin and padding */
-body, html {
+/* Reset margins and padding */
+* {
   margin: 0;
   padding: 0;
-  height: 100%;
-  width: 100%;
-}
-
-/* Container for the headline, textarea, and button */
-.container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-/* Style for the headline */
-.headline {
-  padding: 20px;
-  background-color: #f5f5f5; /* Light gray background */
-  text-align: center;
-  font-size: 24px; /* Set font size */
-  font-weight: bold; /* Bold text */
-}
-
-/* Style the textarea */
-textarea {
-  flex: 1; /* Allow textarea to take up remaining space */
-  border: none;
-  outline: none;
-  resize: none;
   box-sizing: border-box;
-  padding: 20px;
-  font-size: 16px;
-  font-family: Arial, sans-serif;
 }
 
-/* Style the button */
-button {
-  width: 100%;
-  padding: 15px 0; /* Vertical padding */
-  background-color: #007BFF; /* Blue background */
-  color: white; /* White text */
-  border: none;
-  cursor: pointer; /* Hand cursor on hover */
-  position: fixed; /* Fix position to bottom */
-  bottom: 0; /* Align to bottom */
-  left: 0; /* Align to left */
+/* Remove list styles (e.g., bullets) from unordered lists */
+ul, ol {
+  list-style: none;
 }
+
+/* Reset typography styles */
+body {
+  font-family: 'Arial', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Spacing and margin styles */
+/* Example: Set default margin and padding to 0 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Custom utility classes for special styling needs */
+/* Example: Custom utility class for text color */
+.text-primary {
+  color: #007bff;
+}
+h1, h2, h3, p{
+  color: #fff
+}
+/* Customize scrollbar styles */
+/* Example: Customize scrollbar width, color, and behavior */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
+/* Additional global styles */
+/* Example: Apply responsive styles for screens narrower than 768px */
+@media (max-width: 768px) {
+  /* Your responsive styles here */
+}
+
+/* Custom focus style for interactive elements */
+:focus {
+  outline: 2px solid #007bff;
+}
+
+/* Additional global styles as needed */

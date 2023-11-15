@@ -1,4 +1,7 @@
-# Getting Started with Create React App
+
+# 明🧠🦜⛓️
+# Multi-Modal [M]ediator for [I]nterlocutive [N]oxiousness and [G]rievances 
+## MING | an exploration of AI conflict mediation by The Knight Foundation School of Computing and Information Sciences at Florida International University.
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 

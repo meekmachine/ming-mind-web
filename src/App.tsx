@@ -1,16 +1,22 @@
 import React from 'react';
+import { ChakraProvider, CSSReset, ColorModeScript, extendTheme, theme } from '@chakra-ui/react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import FormPage from './FormPage';
 import ResponsePage from './ResponsePage';
+import customTheme from './theme'; // Import your custom Chakra UI theme
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<FormPage />} />
-        <Route path="/response" element={<ResponsePage />} />
-      </Routes>
-    </Router>
+    <ChakraProvider theme={extendTheme(customTheme, theme)}> {/* Extend the default theme with customTheme */}
+      <ColorModeScript initialColorMode="light" /> {/* Use "dark" for dark mode */}
+      <CSSReset />
+      <Router>
+        <Routes>
+          <Route path="/" element={<FormPage />} />
+          <Route path="/response" element={<ResponsePage />} />
+        </Routes>
+      </Router>
+    </ChakraProvider>
   );
 }
 

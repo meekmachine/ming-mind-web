@@ -1,60 +1,67 @@
-/* App.css */
+/* reset.css */
+/* CSS reset or normalization rules */
+/* Example reset code for common styles */
 
-/* Reset default margin and padding */
-body, html {
+/* Reset margins and padding */
+* {
   margin: 0;
   padding: 0;
-  height: 100%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Style for the headline */
-.headline {
-  padding: 20px;
-  background-color: #f5f5f5; /* Light gray background */
-  text-align: center;
-  font-size: 24px; /* Set font size */
-  font-weight: bold; /* Bold text */
-}
-
-/* Style the wrapper div for the form component */
-.form-wrapper, #root {
-  flex: 1; /* Allow the wrapper to take up the remaining space */
-  display: flex;
-  flex-direction: column;
-}
-
-/* Style the textarea */
-textarea {
-  flex: 1; /* Allow textarea to take up remaining space */
-  border: none;
-  outline: none;
-  resize: none;
   box-sizing: border-box;
-  padding: 20px;
+}
+
+/* Remove list styles (e.g., bullets) from unordered lists */
+ul, ol {
+  list-style: none;
+}
+
+/* Reset typography styles */
+body {
+  font-family: 'Arial', sans-serif;
   font-size: 16px;
-  font-family: Arial, sans-serif;
+  line-height: 1.5;
+}
+
+/* Spacing and margin styles */
+/* Example: Set default margin and padding to 0 */
+* {
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* Style the button */
-button {
-  padding: 15px 0; /* Vertical padding */
-  background-color: #007BFF; /* Blue background */
-  color: white; /* White text */
-  border: none;
-  cursor: pointer; /* Hand cursor on hover */
+/* Custom utility classes for special styling needs */
+/* Example: Custom utility class for text color */
+.text-primary {
+  color: #007bff;
+}
+.chakra-heading, h2, h3, p{
+  color: #fff !important
+}
+/* Customize scrollbar styles */
+/* Example: Customize scrollbar width, color, and behavior */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
 }
 
-/* Add this CSS to your stylesheet or <style> tag */
-pre {
-  white-space: pre-wrap; /* Allow line breaks within text */
-  word-wrap: break-word; /* Allow long words to be broken and wrap to the next line */
-  padding:15px;
+::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 6px;
 }
 
-h1 {
-  padding-left: 15px;
+::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
 }
+
+/* Additional global styles */
+/* Example: Apply responsive styles for screens narrower than 768px */
+@media (max-width: 768px) {
+  /* Your responsive styles here */
+}
+
+/* Custom focus style for interactive elements */
+:focus {
+  outline: 2px solid #007bff;
+}
+
+/* Additional global styles as needed */
