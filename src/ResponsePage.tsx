@@ -1,50 +1,73 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { Box, Text, Container } from '@chakra-ui/react'; // Importing Container from Chakra UI
+import IdentifyInterlocutorsModal from './IdentifyInterlocutorsModal';
+import OverallFeedback from './OverallFeedback';
 
 function ResponsePage() {
   const location = useLocation();
-  const state = location.state as { text?: string }; // Type assertion for location.state
-  const [analysis, setAnalysis] = useState<string | null>(null);
-  const [error, setError] = useState<Error | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const state = location.state as { text?: string };
+  const [convo, setConvo] = useState<string | null>(null); // Renamed state variable
+  const [selectedInterlocutor, setSelectedInterlocutor] = useState<string | null>(null);
+  const [userChoicePrompt, setUserChoicePrompt] = useState<string>('');
 
-  // useEffect(() => {
-  //   const fetchAnalysis = async () => {
-  //     try {
-  //       const text = state?.text;
-  //       if (!text) {
-  //         console.error("No text provided in location state");
-  //         return; // Exit early if no text is provided
-  //       }
+  useEffect(() => {
+    if (state?.text) {
+      setConvo(state.text);
+    }
+  }, [state]);
 
-  //       // setAnalysis(data);
-  //     } catch (err) {
-  //       setError(err as Error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
+  const handleIdentificationComplete = (selectedOption: string) => {
+    setSelectedInterlocutor(selectedOption);
+  };
 
-  //   fetchAnalysis();
-  // }, [state]);
-
-  // if (loading) {
-  //   return <div>Loading...</div>;
-  // }
-
-  // if (error) {
-  //   return <div>Error: {error.message}</div>;
-  // }
-
-  if (true) {
-    return <div><h1>Congratulations, your content was a conversation!</h1></div>;
-  }
+  // Vision UI styles
+  const visionUIStyles = {
+    pageContainer: {
+      backgroundColor: '#1A202C', // Darker background color
+      minHeight: '100vh', // Full height
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    contentContainer: {
+      backgroundColor: '#2D3748', // Content background color
+      color: '#fff', // White text color
+      padding: '20px',
+      borderRadius: '8px',
+      margin: '20px',
+      width: '100%', // Standard width
+      maxWidth: '600px', // Max width for larger screens
+    },
+    header: {
+      fontSize: '24px',
+      fontWeight: 'bold',
+      marginBottom: '20px',
+      textAlign: 'center',
+    },
+  };
 
   return (
-    <div>
-      <h1>Analysis</h1>
-      <pre>{analysis}</pre>
-    </div>
+    <Box style={visionUIStyles.pageContainer}>
+      <Container style={visionUIStyles.contentContainer}>
+        <Text>Conversation Analysis</Text>
+        <Text>{userChoicePrompt}</Text> {/* Display user's choice prompt */}
+        {!selectedInterlocutor && convo && (
+          <IdentifyInterlocutorsModal
+            text={convo}
+            isOpen={!selectedInterlocutor}
+            onIdentificationComplete={handleIdentificationComplete}
+            setUserChoicePrompt={setUserChoicePrompt}
+          />
+        )}
+        {selectedInterlocutor && convo && (
+          <OverallFeedback 
+            interlocutor={selectedInterlocutor} 
+            text={convo}
+          />
+        )}
+      </Container>
+    </Box>
   );
 }
 

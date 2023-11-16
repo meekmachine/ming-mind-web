@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { scaleLinear } from 'd3-scale';
 import {
   Button,
   Checkbox,
@@ -9,14 +10,18 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
-  Text,
-  Textarea,
   Slider,
   SliderTrack,
   SliderThumb,
   SliderFilledTrack,
+  Text,
   VStack,
-} from '@chakra-ui/react'; // Import Chakra UI components
+  ModalFooter,
+} from '@chakra-ui/react';
+
+interface StyleObject {
+  [key: string]: string | number;
+}
 
 type FetchConversationModalProps = {
   isOpen: boolean;
@@ -32,6 +37,10 @@ function FetchConversationModal({
   const [minToxicity, setMinToxicity] = useState(0);
   const [minMessages, setMinMessages] = useState(0);
   const [hasPersonalAttack, setHasPersonalAttack] = useState(false);
+
+  const colorScale = scaleLinear<string>()
+    .domain([0, 1])
+    .range(['aqua', 'magenta']);
 
   const fetchConversation = async () => {
     try {
@@ -50,80 +59,88 @@ function FetchConversationModal({
   };
 
   const formatConversation = (conversationData: any[]) => {
-    conversationData.sort((a, b) => a.timestamp - b.timestamp);
-    return conversationData.map((msg) => `${msg.speaker}: ${msg.text}`).join('\n\n');
+    return conversationData.map(msg => {
+      const toxicColor = colorScale(msg["meta.toxicity"]);
+      const attackStyle = msg["meta.comment_has_personal_attack"] ? 'font-weight: bold;' : '';
+      return `<p><span style="color: ${toxicColor}; ${attackStyle}"><b>${msg.speaker}:</b> ${msg.text}</span></p>`;
+    }).join('');
+  };
+  // Custom Vision UI Styles
+  const visionUIStyles = {
+    modalContent: {
+      backgroundColor: '#333', // Dark background
+      color: 'white', // Light text color
+      borderRadius: '8px', // Smooth edges
+    },
+    header: {
+      borderBottom: '1px solid #444', // Subtle separation
+      paddingBottom: '0.5rem',
+    },
+    footer: {
+      borderTop: '1px solid #444',
+      paddingTop: '0.5rem',
+    },
+    sliderTrack: {
+      backgroundColor: '#555', // Dark track
+    },
+    sliderFilled: {
+      backgroundColor: '#4A90E2', // Accent color for filled part
+    },
+    sliderThumb: {
+      backgroundColor: '#4A90E2', // Matching thumb color
+    },
   };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
-      <ModalContent
-        bg="gray.800"
-        color="white"
-        borderRadius="md"
-        p={4}
-        boxShadow="lg"
-        maxW="lg"
-      >
-        <ModalHeader fontSize="2xl" mb={2}>
-          Meet Ming
-        </ModalHeader>
-        <ModalCloseButton _hover={{ color: 'red.500' }} />
+      <ModalContent sx={visionUIStyles.modalContent}>
+        <ModalHeader sx={visionUIStyles.header}>Fetch Conversation</ModalHeader>
+        <ModalCloseButton />
         <ModalBody>
-          <Text mb={4}>
-            Ming is an exploration of AI's capabilities in conflict mediation, using The
-            Cornell University Social Dynamics Lab's "Conversations Gone Awry" corpora for
-            demonstration purposes. We've added enhanced capabilities for exploring the
-            data.
-          </Text>
-          <Text mb={4}>
-            Use the sliders and checkboxes below to filter the conversations, and click
-            "Fetch Conversation" to get a conversation that matches your criteria. Then,
-            click "Submit" to see Ming's analysis of the conversation.
-          </Text>
           <VStack spacing={4}>
-            <Text>Min Toxicity: {minToxicity}</Text>
+            <Text fontSize="md">
+              This tool fetches conversations from the Conversations Gone Awry (CGA) corpus, 
+              a dataset used to study how online interactions can escalate into toxic or harmful exchanges.
+            </Text>
+            <Text>Minimum Toxicity Score (0 to 1):</Text>
             <Slider
+              value={minToxicity}
+              onChange={setMinToxicity}
               min={0}
               max={1}
-              step={0.1}
-              value={minToxicity}
-              onChange={(value) => setMinToxicity(value)}
-            >
+              step={0.1}>
               <SliderTrack>
                 <SliderFilledTrack />
               </SliderTrack>
               <SliderThumb />
             </Slider>
-            <Text>Min Messages: {minMessages}</Text>
+
+            <Text>Minimum Number of Messages:</Text>
             <Slider
-              min={0}
-              max={50}
-              step={1}
               value={minMessages}
-              onChange={(value) => setMinMessages(value)}
-            >
+              onChange={setMinMessages}
+              min={0}
+              max={100}
+              step={1}>
               <SliderTrack>
                 <SliderFilledTrack />
               </SliderTrack>
               <SliderThumb />
             </Slider>
+
             <Checkbox
               isChecked={hasPersonalAttack}
-              onChange={(e) => setHasPersonalAttack(e.target.checked)}
-            >
-              Has Personal Attack
+              onChange={(e) => setHasPersonalAttack(e.target.checked)}>
+              Include Personal Attacks
             </Checkbox>
           </VStack>
         </ModalBody>
-        <Button
-          colorScheme="blue"
-          onClick={fetchConversation}
-          mt={4}
-          _hover={{ bg: 'blue.500' }}
-        >
-          Fetch Conversation
-        </Button>
+        <ModalFooter>
+          <Button colorScheme="blue" onClick={fetchConversation}>
+            Fetch
+          </Button>
+        </ModalFooter>
       </ModalContent>
     </Modal>
   );

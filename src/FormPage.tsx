@@ -1,24 +1,21 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Button,
-  Textarea,
-  VStack,
-  useColorModeValue,
-  HStack,
-} from '@chakra-ui/react';
+import { Box, Button, VStack, HStack } from '@chakra-ui/react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import FetchConversationModal from './FetchConversationModal';
 import VerificationModal from './VerificationModal';
 import AwryDescriberModal from './AwryDescriberModal';
+import { useNavigation } from 'react-router-dom'; // Import useHistory
 
 function FormPage() {
   const [text, setText] = useState('');
-  const [conversationJson, setConversationJson] = useState<any>(null); // Replace 'any' with the appropriate type
+  const [conversationJson, setConversationJson] = useState<any>(null);
   const [showFetchModal, setShowFetchModal] = useState(false);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [showDescriberModal, setShowDescriberModal] = useState(false);
-  const navigate = useNavigate();
+  const quillRef = useRef(null);
+  const navigate = useNavigate(); // Create the history object
 
   const handleSubmit = () => {
     setShowVerificationModal(true);
@@ -31,43 +28,50 @@ function FormPage() {
     setShowDescriberModal(true);
   };
 
-  const handleVerified = () => {
-    navigate('/response', { state: { text } });
+  const handleVerificationComplete = (valid: boolean) => {
+    setShowVerificationModal(false);
+    if (valid) {
+      navigate('/response', { state: { anlysis: text } }); // Navigate with the text state
+    }
   };
 
-  const bgColor = useColorModeValue('gray.900', 'gray.800'); // Darker background color
-
-  const formStyle: React.CSSProperties = {
-    backgroundColor: bgColor,
-    height: '100vh', // Take up full viewport height
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-  };
-
-  const modalStyle: React.CSSProperties = {
-    position: 'fixed',
-    bottom: showDescriberModal ? '0' : '-50%',
-    left: '0',
-    width: '100%',
-    height: '50%',
-    transition: 'bottom 2s ease-in-out',
+  // Custom styles for ReactQuill editor
+  const customStyles = {
+    '.quill': { 
+      border: 'none',
+      fontFamily: "'Press Start 2P', monospace", // Apply the pixel font
+    },
+    '.ql-editor': {
+      height: 'calc(100vh - 50px)', // Full height minus some space for buttons
+      backgroundColor: '#4a4b52', // Background color
+      color: 'white', // Text color
+    },
+    '.ql-toolbar': {
+      display: 'none', // Hide the toolbar
+    }
   };
 
   return (
-    <Box style={formStyle}>
-      <VStack spacing={4}>
-        <Textarea
-          placeholder="Enter your text here"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          size="lg"
-          height="100%" // Take up full height of the component
-          width="80vw" // Set the width to 80% of the viewport width
-          bg="gray.700" // Darker background for the textarea
-        />
-        <HStack>
+    <Box
+      w="100vw"
+      h="100vh"
+      bg="#4a4b52"
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center"
+    >
+      <VStack spacing={4} w="100%" h="100%">
+        <Box sx={customStyles}>
+          <ReactQuill 
+            ref={quillRef}
+            value={text}
+            onChange={setText}
+            readOnly={false}
+            theme="snow"
+          />
+        </Box>
+        <HStack position="absolute" bottom="20px">
           <Button colorScheme="blue" onClick={handleSubmit}>
             Submit
           </Button>
@@ -87,16 +91,13 @@ function FormPage() {
         text={text}
         isOpen={showVerificationModal}
         onClose={() => setShowVerificationModal(false)}
-        onVerified={handleVerified}
       />
 
-      <div style={modalStyle}>
-        <AwryDescriberModal
-          conversationData={conversationJson}
-          isOpen={showDescriberModal}
-          onClose={() => setShowDescriberModal(false)}
-        />
-      </div>
+      <AwryDescriberModal
+        isOpen={showDescriberModal}
+        onClose={() => setShowDescriberModal(false)}
+        conversationData={conversationJson}
+      />
     </Box>
   );
 }

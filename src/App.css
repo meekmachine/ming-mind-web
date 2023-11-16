@@ -1,6 +1,7 @@
 /* reset.css */
 /* CSS reset or normalization rules */
 /* Example reset code for common styles */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 /* Reset margins and padding */
 * {
@@ -8,7 +9,9 @@
   padding: 0;
   box-sizing: border-box;
 }
-
+.ql-container.ql-snow {
+  border: none !important;
+}
 /* Remove list styles (e.g., bullets) from unordered lists */
 ul, ol {
   list-style: none;

@@ -1,13 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import {
-  Box,
-  Spinner,
-  Text,
-  Button,
-  useColorModeValue,
-  Slide,
-} from '@chakra-ui/react';
+import { Box, Text, Slide, Spinner, Button, useTheme } from '@chakra-ui/react';
 
 type AwryDescriberModalProps = {
   isOpen: boolean;
@@ -15,124 +8,80 @@ type AwryDescriberModalProps = {
   conversationData: any[];
 };
 
-const AwryDescriberModal = ({
-  isOpen,
-  onClose,
-  conversationData,
-}: AwryDescriberModalProps) => {
+const AwryDescriberModal = ({ isOpen, onClose, conversationData }: AwryDescriberModalProps) => {
   const [description, setDescription] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [audio] = useState(new Audio('window.mp3'));
-
-  // Use useColorModeValue to set colors
-  const primaryColor = useColorModeValue('primary.600', 'primary.200');
-  const errorColor = 'red.500';
+  const theme = useTheme();
 
   useEffect(() => {
     if (isOpen && conversationData) {
+      setLoading(true);
+      audio.currentTime = 0;
+      audio.play();
+      setTimeout(() => audio.pause(), 1800); // Stop the audio after 1.8 seconds
+
       fetchDescription();
     }
   }, [isOpen, conversationData]);
 
-  useEffect(() => {
-    if (isOpen) {
-      playAudio(0); // Play the audio from 0s when modal is opened
-    } else {
-      playAudio(2); // Play the audio from 2s when modal is closed
-    }
-  }, [isOpen]);
-
   const formatConversation = (conversationData: any[]) => {
-    conversationData.sort((a, b) => a.timestamp - b.timestamp);
-    return conversationData
-      .map((msg) => `${msg.speaker}: ${msg.text}`)
-      .join('\n\n');
+    // Assuming each message in conversationData has 'speaker' and 'text'
+    return conversationData.map((msg) => `${msg.speaker}: ${msg.text}`).join('\n');
   };
 
   const fetchDescription = async () => {
-    setLoading(true);
-    setError(null);
-    let data = formatConversation(conversationData);
     try {
-      const response = await axios.post(
-        'http://localhost:8000/awry-describer',
-        { data },
-        { headers: { 'Content-Type': 'application/json' } }
-      );
-      setLoading(false);
+      const formattedData = formatConversation(conversationData);
+      const response = await axios.post('http://localhost:8000/awry-describer', { data: formattedData });
       setDescription(response.data);
-    } catch (err) {
-      if (err instanceof Error && 'message' in err) {
-        setError(err.message);
-      } else {
-        setError('An unknown error occurred.');
-      }
+      setLoading(false);
+    } catch (error) {
+      setDescription("Failed to fetch the description.");
       setLoading(false);
     }
   };
 
-  const playAudio = (startTime: number) => {
-    audio.currentTime = startTime;
+  const closeAwryModal = () => {
+    // Play closing sound effect
+    audio.currentTime = 2.1;
     audio.play();
-  };
-
-  const modalStyle: React.CSSProperties = {
-    position: 'fixed',
-    top: isOpen ? '0' : '100%',
-    left: '0',
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    transition: 'top 2s', // Use CSS transition for animation
-    opacity: isOpen ? 1 : 0,
-    zIndex: isOpen ? 999 : -1,
-  };
-
-  const contentStyle: React.CSSProperties = {
-    background: 'gray.800',
-    padding: '1rem',
-    borderRadius: 'md',
-    boxShadow: 'lg',
-    width: '100%',
-    maxWidth: '100%',
-    transform: isOpen ? 'translateY(0)' : 'translateY(100%)',
-    transition: 'transform 2s', // Slide up/down transition
+    setTimeout(() => {
+      audio.pause();
+      onClose();
+    }, 1600); // Duration for the closing sound effect
   };
 
   return (
-    <div style={modalStyle}>
-      <div style={contentStyle}>
-        <Text color={primaryColor} fontSize="xl" fontWeight="bold" mb={4}>
-          Awry Description
-        </Text>
+    <Slide direction="bottom" in={isOpen} style={{ zIndex: 99 }} unmountOnExit>
+      <Box
+        w="100vw"
+        h="50vh"
+        bg={theme.colors.gray[800]}
+        color={theme.colors.gray[50]}
+        p={4}
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent={loading ? "center" : "start"}
+        overflowY="auto"
+      >
         {loading ? (
-          <Box textAlign="center">
-            <Spinner color={primaryColor} />
+          <>
+            <Spinner color="blue.500" />
             <Text>Loading description...</Text>
-          </Box>
-        ) : error ? (
-          <Text color={errorColor}>Error: {error}</Text>
+          </>
         ) : (
-          <Text>
-            {description ? description : 'No description available'}
-          </Text>
+          <Box p={4} w="100%" maxW="600px">
+            <Text fontSize="lg" mb={2}>Overview</Text>
+            <Text mb={4}>{description}</Text>
+            <Button colorScheme="blue" onClick={closeAwryModal}>
+              Close
+            </Button>
+          </Box>
         )}
-        <Button
-          colorScheme="blue"
-          onClick={() => {
-            onClose();
-          }}
-          mt={4}
-          alignSelf="flex-end"
-        >
-          Close
-        </Button>
-      </div>
-    </div>
+      </Box>
+    </Slide>
   );
 };
 

@@ -8,7 +8,7 @@ import customTheme from './theme'; // Import your custom Chakra UI theme
 function App() {
   return (
     <ChakraProvider theme={extendTheme(customTheme, theme)}> {/* Extend the default theme with customTheme */}
-      <ColorModeScript initialColorMode="light" /> {/* Use "dark" for dark mode */}
+      <ColorModeScript initialColorMode="dark" /> {/* Use "dark" for dark mode */}
       <CSSReset />
       <Router>
         <Routes>
