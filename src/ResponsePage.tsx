@@ -7,9 +7,10 @@ import OverallFeedback from './OverallFeedback';
 function ResponsePage() {
   const location = useLocation();
   const state = location.state as { text?: string };
-  const [convo, setConvo] = useState<string | null>(null); // Renamed state variable
+  const [convo, setConvo] = useState<string | null>(null);
   const [selectedInterlocutor, setSelectedInterlocutor] = useState<string | null>(null);
   const [userChoicePrompt, setUserChoicePrompt] = useState<string>('');
+  const [sessionId, setSessionId] = useState<string>('');
 
   useEffect(() => {
     if (state?.text) {
@@ -46,24 +47,25 @@ function ResponsePage() {
       textAlign: 'center',
     },
   };
-
   return (
     <Box style={visionUIStyles.pageContainer}>
       <Container style={visionUIStyles.contentContainer}>
         <Text>Conversation Analysis</Text>
-        <Text>{userChoicePrompt}</Text> {/* Display user's choice prompt */}
+        <Text>{userChoicePrompt}</Text>
         {!selectedInterlocutor && convo && (
           <IdentifyInterlocutorsModal
             text={convo}
             isOpen={!selectedInterlocutor}
             onIdentificationComplete={handleIdentificationComplete}
             setUserChoicePrompt={setUserChoicePrompt}
+            setSessionId={setSessionId}
           />
         )}
         {selectedInterlocutor && convo && (
           <OverallFeedback 
             interlocutor={selectedInterlocutor} 
             text={convo}
+            sessionId={sessionId}
           />
         )}
       </Container>

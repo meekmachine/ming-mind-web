@@ -18,6 +18,7 @@ interface IdentifyInterlocutorsModalProps {
   onIdentificationComplete: (selectedOption: string) => void;
   text: string | null;
   setUserChoicePrompt: (message: string) => void;
+  setSessionId: (id: string) => void; // Add this line
 }
 
 const IdentifyInterlocutorsModal: React.FC<IdentifyInterlocutorsModalProps> = ({
@@ -25,6 +26,7 @@ const IdentifyInterlocutorsModal: React.FC<IdentifyInterlocutorsModalProps> = ({
   onIdentificationComplete,
   text,
   setUserChoicePrompt,
+  setSessionId, // Add this line
 }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,10 +44,12 @@ const IdentifyInterlocutorsModal: React.FC<IdentifyInterlocutorsModalProps> = ({
   const identifyInterlocutors = async () => {
     try {
       const response = await axios.post('http://localhost:8000/id-interlocutors', { text });
-      const args = response.data.split("||");
+      console.log(response.data);
+      const args = response.data.result.split("||");
       if (args.length === 3) {
         setParticipants([args[0], args[1]]);
         setMessage(args[2]);
+        setSessionId(response.data.session_id); // Simulated session ID
       } else {
         throw new Error('Invalid data format');
       }
@@ -72,7 +76,6 @@ const IdentifyInterlocutorsModal: React.FC<IdentifyInterlocutorsModalProps> = ({
       margin: '5px',
     }
   };
-
   return (
     <Modal isOpen={isOpen} onClose={() => {}} size="lg" isCentered closeOnOverlayClick={false}>
       <ModalOverlay />

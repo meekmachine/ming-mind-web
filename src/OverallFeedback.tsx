@@ -4,31 +4,31 @@ import axios from 'axios';
 interface OverallFeedbackProps {
   interlocutor: string;
   text: string;
+  sessionId: string; // Include session ID
 }
 
-interface FeedbackResponse {
+interface FeedbackResponse { // Define this interface
   message: string;
 }
 
-const OverallFeedback: React.FC<OverallFeedbackProps> = ({ interlocutor, text }) => {
+const OverallFeedback: React.FC<OverallFeedbackProps> = ({ interlocutor, text, sessionId }) => {
   const [feedback, setFeedback] = useState<FeedbackResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchFeedback = async () => {
       try {
-        // Replace with your actual API endpoint
-        const response = await axios.post('http://localhost:8000/feedback', { interlocutor, text });
+        const response = await axios.post('http://localhost:8000/feedback', { interlocutor, text, session_id: sessionId });
         setFeedback(response.data);
       } catch (error) {
         setError('Failed to get feedback.');
       }
     };
 
-    if (interlocutor && text) {
+    if (interlocutor && text && sessionId) {
       fetchFeedback();
     }
-  }, [interlocutor, text]);
+  }, [interlocutor, text, sessionId]);
 
   if (error) {
     return <p>Error: {error}</p>;
