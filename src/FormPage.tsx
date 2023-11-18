@@ -9,7 +9,8 @@ import AwryDescriberModal from './AwryDescriberModal';
 import { useNavigation } from 'react-router-dom'; // Import useHistory
 
 function FormPage() {
-  const [text, setText] = useState('');
+  const [plainText, setPlainText] = useState('');
+  const [formattedText, setFormattedText] = useState('');
   const [conversationJson, setConversationJson] = useState<any>(null);
   const [showFetchModal, setShowFetchModal] = useState(false);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
@@ -22,18 +23,14 @@ function FormPage() {
   };
 
   const handleFetchConversation = (conversationResponse: any) => {
-    setText(conversationResponse.text);
+    setPlainText(conversationResponse.plainText);
+    setFormattedText(conversationResponse.formattedText);
     setConversationJson(conversationResponse.json);
     setShowFetchModal(false);
     setShowDescriberModal(true);
   };
 
-  const handleVerificationComplete = (valid: boolean) => {
-    setShowVerificationModal(false);
-    if (valid) {
-      navigate('/response', { state: { anlysis: text } }); // Navigate with the text state
-    }
-  };
+
 
   // Custom styles for ReactQuill editor
   const customStyles = {
@@ -65,8 +62,8 @@ function FormPage() {
         <Box sx={customStyles}>
           <ReactQuill 
             ref={quillRef}
-            value={text}
-            onChange={setText}
+            value={formattedText}
+            onChange={setFormattedText}
             readOnly={false}
             theme="snow"
           />
@@ -88,7 +85,7 @@ function FormPage() {
       />
 
       <VerificationModal
-        text={text}
+        plainText={plainText}
         isOpen={showVerificationModal}
         onClose={() => setShowVerificationModal(false)}
       />

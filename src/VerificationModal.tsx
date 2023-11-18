@@ -15,13 +15,14 @@ import {
 } from '@chakra-ui/react';
 
 interface VerificationModalProps {
-  text: string;
+// Formatted text (HTML)
+  plainText: string;     // Plain text for verification
   isOpen: boolean;
   onClose: () => void;
 }
 
 const VerificationModal: React.FC<VerificationModalProps> = ({
-  text,
+  plainText,     // New prop for plain text
   isOpen,
   onClose,
 }) => {
@@ -34,15 +35,15 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isOpen && text) {
+    if (isOpen && plainText) { // Use plainText for verification
       verifyConversation();
     }
-  }, [isOpen, text]);
+  }, [isOpen, plainText]);
 
   const verifyConversation = async () => {
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:8000/is-mingable', { text });
+      const response = await axios.post('http://localhost:8000/is-mingable', { text: plainText });
       const isValid = response.data.valid;
       setVerificationResult({
         status: isValid ? 'success' : 'error',
@@ -62,7 +63,7 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
 
   const handleGoToAnalysis = () => {
     if (verificationResult.valid) {
-      navigate('/response', { state: { text: text } }); // Navigate with the text to the response page
+      navigate('/response', { state: { text: plainText } }); // Navigate with the formatted text to the response page
     }
   };
 

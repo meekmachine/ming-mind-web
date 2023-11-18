@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import {
   Modal,
@@ -18,7 +18,7 @@ interface IdentifyInterlocutorsModalProps {
   onIdentificationComplete: (selectedOption: string) => void;
   text: string | null;
   setUserChoicePrompt: (message: string) => void;
-  setSessionId: (id: string) => void; // Add this line
+  setSessionId: (id: string) => void;
 }
 
 const IdentifyInterlocutorsModal: React.FC<IdentifyInterlocutorsModalProps> = ({
@@ -26,49 +26,58 @@ const IdentifyInterlocutorsModal: React.FC<IdentifyInterlocutorsModalProps> = ({
   onIdentificationComplete,
   text,
   setUserChoicePrompt,
-  setSessionId, // Add this line
+  setSessionId,
 }) => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [participants, setParticipants] = useState<string[]>([]);
   const [message, setMessage] = useState<string>('');
+  const requestInProgress = useRef(false);
 
   useEffect(() => {
-    if (isOpen && text) {
-      identifyInterlocutors();
-    } else {
-      setLoading(false);
-    }
-  }, [isOpen, text]);
+    if (isOpen && text && !requestInProgress.current) {
+      requestInProgress.current = true;
+      setLoading(true);
 
-  const identifyInterlocutors = async () => {
-    try {
-      const response = await axios.post('http://localhost:8000/id-interlocutors', { text });
-      console.log(response.data);
-      const args = response.data.result.split("||");
-      if (args.length === 3) {
-        setParticipants([args[0], args[1]]);
-        setMessage(args[2]);
-        setSessionId(response.data.session_id); // Simulated session ID
-      } else {
-        throw new Error('Invalid data format');
-      }
-    } catch (error) {
-      setError('Error identifying interlocutors.');
-    } finally {
-      setLoading(false);
+      const identifyInterlocutors = async () => {
+        try {
+          const response = await axios.post('http://localhost:8000/id-interlocutors', { text });
+          const args = response.data.result.split("||");
+          if (args.length === 3) {
+            setParticipants([args[0], args[1]]);
+            setMessage(args[2]);
+            setSessionId(response.data.session_id);
+          } else {
+            throw new Error('Invalid data format');
+          }
+        } catch (error) {
+          setError('Error identifying interlocutors.');
+        } finally {
+          setLoading(false);
+          requestInProgress.current = false;
+        }
+      };
+
+      identifyInterlocutors();
     }
-  };
+
+    return () => {
+      setLoading(false);
+      setError(null);
+      setParticipants([]);
+      setMessage('');
+      requestInProgress.current = false;
+    };
+  }, [isOpen, text, setSessionId]);
 
   const handleSelection = (selectedOption: string) => {
     setUserChoicePrompt(`You have selected: ${selectedOption}`);
     onIdentificationComplete(selectedOption);
   };
 
-  // Vision UI styles
   const modalStyles = {
     content: {
-      backgroundColor: '#2D3748', // Dark background
+      backgroundColor: '#2D3748',
       color: 'white',
       borderRadius: '8px',
     },
@@ -76,6 +85,7 @@ const IdentifyInterlocutorsModal: React.FC<IdentifyInterlocutorsModalProps> = ({
       margin: '5px',
     }
   };
+
   return (
     <Modal isOpen={isOpen} onClose={() => {}} size="lg" isCentered closeOnOverlayClick={false}>
       <ModalOverlay />

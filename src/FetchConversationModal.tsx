@@ -19,14 +19,10 @@ import {
   ModalFooter,
 } from '@chakra-ui/react';
 
-interface StyleObject {
-  [key: string]: string | number;
-}
-
 type FetchConversationModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onFetchConversation: (conversation: { text: string; json: any }) => void;
+  onFetchConversation: (conversation: { formattedText: string; plainText: string; json: any }) => void;
 };
 
 function FetchConversationModal({
@@ -52,7 +48,13 @@ function FetchConversationModal({
         },
       });
       const formattedConversation = formatConversation(response.data);
-      onFetchConversation({ text: formattedConversation, json: response.data });
+      const plainTextConversation = response.data.map((msg: { speaker: any; text: any; }) => `${msg.speaker}: ${msg.text}`).join('\n');
+
+      onFetchConversation({ 
+        formattedText: formattedConversation, 
+        plainText: plainTextConversation,
+        json: response.data 
+      });
     } catch (error) {
       console.error('Error fetching conversation:', error);
     }
@@ -65,6 +67,7 @@ function FetchConversationModal({
       return `<p><span style="color: ${toxicColor}; ${attackStyle}"><b>${msg.speaker}:</b> ${msg.text}</span></p>`;
     }).join('');
   };
+
   // Custom Vision UI Styles
   const visionUIStyles = {
     modalContent: {

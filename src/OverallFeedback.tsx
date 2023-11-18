@@ -19,7 +19,7 @@ const OverallFeedback: React.FC<OverallFeedbackProps> = ({ interlocutor, text, s
     const fetchFeedback = async () => {
       try {
         const response = await axios.post('http://localhost:8000/feedback', { interlocutor, text, session_id: sessionId });
-        setFeedback(response.data);
+        setFeedback(response.data.result);
       } catch (error) {
         setError('Failed to get feedback.');
       }
@@ -41,7 +41,7 @@ const OverallFeedback: React.FC<OverallFeedbackProps> = ({ interlocutor, text, s
   return (
     <div>
       <h2>Feedback</h2>
-      <p>{feedback.message}</p>
+      <p>{feedback as any as string}</p>
     </div>
   );
 };
