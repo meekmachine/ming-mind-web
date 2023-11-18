@@ -1,48 +1,70 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Box, Text, Spinner, Alert, AlertIcon, AlertDescription } from '@chakra-ui/react';
 
 interface OverallFeedbackProps {
-  interlocutor: string;
-  text: string;
-  sessionId: string; // Include session ID
+  interlocutor: string | null;
+  text: string | null;
+  setFactors: (factors: string[]) => void;
 }
 
-interface FeedbackResponse { // Define this interface
+interface FeedbackResponse {
   message: string;
 }
 
-const OverallFeedback: React.FC<OverallFeedbackProps> = ({ interlocutor, text, sessionId }) => {
+const OverallFeedback: React.FC<OverallFeedbackProps> = ({ interlocutor, text, setFactors }) => {
   const [feedback, setFeedback] = useState<FeedbackResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchFeedback = async () => {
+      setIsLoading(true);
       try {
-        const response = await axios.post('http://localhost:8000/feedback', { interlocutor, text, session_id: sessionId });
-        setFeedback(response.data.result);
+        const response = await axios.post('http://localhost:8000/feedback', { interlocutor, text });
+        const responseData = response.data.result.split('||');
+        if (responseData.length >= 3) {
+          setFactors([responseData[0].trim(), responseData[1].trim()]);
+          setFeedback({ message: responseData[2].trim() });
+        } else {
+          throw new Error('Invalid feedback data format');
+        }
       } catch (error) {
         setError('Failed to get feedback.');
       }
+      setIsLoading(false);
     };
 
-    if (interlocutor && text && sessionId) {
+    if (interlocutor && text) {
       fetchFeedback();
     }
-  }, [interlocutor, text, sessionId]);
-
-  if (error) {
-    return <p>Error: {error}</p>;
-  }
-
-  if (!feedback) {
-    return <p>Loading feedback...</p>;
-  }
+  }, [interlocutor, text, setFactors]);
 
   return (
-    <div>
-      <h2>Feedback</h2>
-      <p>{feedback as any as string}</p>
-    </div>
+    <Box
+      bg="#2D3748" // Dark background color
+      color="#fff" // White text color
+      p={4} // Padding
+      borderRadius="lg" // Rounded corners
+      my={4} // Margin top and bottom
+    >
+      {isLoading ? (
+        <Spinner color="blue.500" />
+      ) : error ? (
+        <Alert status="error">
+          <AlertIcon />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : (
+        <>
+          <Text fontSize="xl" fontWeight="bold" mb={4}>Feedback</Text>
+          {feedback && feedback.message.split('\n')
+            .filter(line => line.trim() !== '')
+            .map((line, index) => <Text key={index}>{line}</Text>)
+          }
+        </>
+      )}
+    </Box>
   );
 };
 

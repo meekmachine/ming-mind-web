@@ -1,119 +1,119 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  Text,
-  Button,
-  Spinner,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalCloseButton,
+    Text,
+    Button,
+    Spinner,
+    useColorModeValue,
+    Alert,
+    AlertIcon
 } from '@chakra-ui/react';
 
 interface IdentifyInterlocutorsModalProps {
-  isOpen: boolean;
-  onIdentificationComplete: (selectedOption: string) => void;
-  text: string | null;
-  setUserChoicePrompt: (message: string) => void;
-  setSessionId: (id: string) => void;
+    isOpen: boolean;
+    onIdentificationComplete: (selectedOption: string, participants: string[]) => void;
+    text: string | null;
+    setUserChoicePrompt: (message: string) => void;
 }
 
 const IdentifyInterlocutorsModal: React.FC<IdentifyInterlocutorsModalProps> = ({
-  isOpen,
-  onIdentificationComplete,
-  text,
-  setUserChoicePrompt,
-  setSessionId,
+    isOpen,
+    onIdentificationComplete,
+    text,
+    setUserChoicePrompt,
 }) => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [participants, setParticipants] = useState<string[]>([]);
-  const [message, setMessage] = useState<string>('');
-  const requestInProgress = useRef(false);
+    const [loading, setLoading] = useState(false);
+    const [isFetching, setIsFetching] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [participants, setParticipants] = useState<string[]>([]);
+    const [message, setMessage] = useState<string>('');
 
-  useEffect(() => {
-    if (isOpen && text && !requestInProgress.current) {
-      requestInProgress.current = true;
-      setLoading(true);
-
-      const identifyInterlocutors = async () => {
-        try {
-          const response = await axios.post('http://localhost:8000/id-interlocutors', { text });
-          const args = response.data.result.split("||");
-          if (args.length === 3) {
-            setParticipants([args[0], args[1]]);
-            setMessage(args[2]);
-            setSessionId(response.data.session_id);
-          } else {
-            throw new Error('Invalid data format');
-          }
-        } catch (error) {
-          setError('Error identifying interlocutors.');
-        } finally {
-          setLoading(false);
-          requestInProgress.current = false;
+    useEffect(() => {
+        // Perform the API call only when the modal is opened and text is available
+        if (isOpen && text) {
+            setLoading(true);
+            identifyInterlocutors();
         }
-      };
 
-      identifyInterlocutors();
-    }
+        // Reset states when the modal is closed
+        return () => {
+            if (!isOpen) {
+                setLoading(false);
+                setError(null);
+                setParticipants([]);
+                setMessage('');
+            }
+        };
+    }, [isOpen, text]); // Depend only on isOpen and text
 
-    return () => {
-      setLoading(false);
-      setError(null);
-      setParticipants([]);
-      setMessage('');
-      requestInProgress.current = false;
+    const identifyInterlocutors = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.post('http://localhost:8000/id-interlocutors', { text });
+            const data = response.data.result.split('||');
+            setParticipants([data[0], data[1]]);
+            setMessage(data[2]);
+
+        } catch (error) {
+            setError('Error identifying interlocutors.');
+        } finally {
+            setLoading(false);
+            setIsFetching(false);
+        }
     };
-  }, [isOpen, text, setSessionId]);
 
-  const handleSelection = (selectedOption: string) => {
-    setUserChoicePrompt(`You have selected: ${selectedOption}`);
-    onIdentificationComplete(selectedOption);
-  };
+    const handleSelection = (selectedOption: string, participants: string[]) => {
+        setUserChoicePrompt(`You have selected: ${selectedOption}`);
+        onIdentificationComplete(selectedOption, participants); // Include participants here
+    };
 
-  const modalStyles = {
-    content: {
-      backgroundColor: '#2D3748',
-      color: 'white',
-      borderRadius: '8px',
-    },
-    button: {
-      margin: '5px',
-    }
-  };
+    // Vision UI styles
+    const modalBgColor = useColorModeValue('#2D3748', '#1A202C');
+    const textColor = useColorModeValue('#FFFFFF', '#E2E8F0');
+    const buttonStyle = {
+        backgroundColor: '#4A5568',
+        color: 'white',
+        margin: '5px',
+        _hover: { bg: '#718096' },
+    };
 
-  return (
-    <Modal isOpen={isOpen} onClose={() => {}} size="lg" isCentered closeOnOverlayClick={false}>
-      <ModalOverlay />
-      <ModalContent style={modalStyles.content}>
-        <ModalHeader>Identify Interlocutors</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
-          {loading ? (
-            <Spinner color='blue.500' size='lg' />
-          ) : error ? (
-            <Text>{error}</Text>
-          ) : (
-            <>
-              <Text>{message}</Text>
-              {participants.map((participant, index) => (
-                <Button key={index} colorScheme="blue" style={modalStyles.button} onClick={() => handleSelection(participant)}>
-                  {participant}
-                </Button>
-              ))}
-              <Button colorScheme="blue" style={modalStyles.button} onClick={() => handleSelection('Neither')}>
-                Neither
-              </Button>
-            </>
-          )}
-        </ModalBody>
-      </ModalContent>
-    </Modal>
-  );
+    return (
+        <Modal isOpen={isOpen} onClose={() => { }} size="lg" isCentered closeOnOverlayClick={false}>
+            <ModalOverlay />
+            <ModalContent bg={modalBgColor}>
+                <ModalHeader color={textColor}>Identify Interlocutors</ModalHeader>
+                <ModalCloseButton />
+                <ModalBody>
+                    {loading ? (
+                        <Spinner color='blue.500' size='lg' />
+                    ) : error ? (
+                        <Alert status="error">
+                            <AlertIcon />
+                            {error}
+                        </Alert>
+                    ) : (
+                        <>
+                            <Text color={textColor}>{message}</Text>
+                            {participants.map((participant, index) => (
+                                <Button key={index} colorScheme="blue" style={buttonStyle} onClick={() => handleSelection(participants[index], participants)}>
+                                    {participant}
+                                </Button>
+                            ))}
+                            <Button colorScheme="blue" style={buttonStyle} onClick={() => handleSelection('Neither', participants)}>
+                                Neither
+                            </Button>
+                        </>
+                    )}
+                </ModalBody>
+            </ModalContent>
+        </Modal>
+    );
 };
 
 export default IdentifyInterlocutorsModal;
