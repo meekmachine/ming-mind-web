@@ -37,6 +37,9 @@ body {
 .chakra-heading, h2, h3, p{
   color: #fff !important
 }
+p.para {
+  margin: 0 0 1.2em 0;
+}
 /* Customize scrollbar styles */
 /* Example: Customize scrollbar width, color, and behavior */
 ::-webkit-scrollbar {

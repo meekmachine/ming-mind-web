@@ -16,7 +16,7 @@
 ul, ol {
   list-style: none;
 }
-
+p {padding: 1.2em 0;}
 /* Reset typography styles */
 body {
   font-family: 'Arial', sans-serif;

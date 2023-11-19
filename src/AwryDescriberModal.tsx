@@ -13,6 +13,7 @@ const AwryDescriberModal = ({ isOpen, onClose, conversationData }: AwryDescriber
   const [loading, setLoading] = useState(false);
   const [audio] = useState(new Audio('window.mp3'));
   const theme = useTheme();
+  const [shouldSlideUp, setShouldSlideUp] = useState(false);
 
   useEffect(() => {
     if (isOpen && conversationData) {
@@ -24,6 +25,24 @@ const AwryDescriberModal = ({ isOpen, onClose, conversationData }: AwryDescriber
       fetchDescription();
     }
   }, [isOpen, conversationData]);
+
+  useEffect(() => {
+    if (description !== null) {
+      setShouldSlideUp(true);
+    }
+  }, [description]);
+
+  useEffect(() => {
+    if (isOpen) {
+      // Play opening sound effect
+      audio.currentTime = 0;
+      audio.play();
+    } else {
+      // Play closing sound effect
+      audio.currentTime = 2.1;
+      audio.play();
+    }
+  }, [isOpen]);
 
   const formatConversation = (conversationData: any[]) => {
     // Assuming each message in conversationData has 'speaker' and 'text'
@@ -43,17 +62,15 @@ const AwryDescriberModal = ({ isOpen, onClose, conversationData }: AwryDescriber
   };
 
   const closeAwryModal = () => {
-    // Play closing sound effect
-    audio.currentTime = 2.1;
-    audio.play();
-    setTimeout(() => {
-      audio.pause();
-      onClose();
-    }, 1600); // Duration for the closing sound effect
+    onClose();
   };
 
+  if (!isOpen) {
+    return null;
+  }
+
   return (
-    <Slide direction="bottom" in={isOpen} style={{ zIndex: 99 }} unmountOnExit>
+    <Slide direction="bottom" in={shouldSlideUp} style={{ zIndex: 99 }} unmountOnExit>
       <Box
         w="100vw"
         h="50vh"
@@ -65,6 +82,7 @@ const AwryDescriberModal = ({ isOpen, onClose, conversationData }: AwryDescriber
         alignItems="center"
         justifyContent={loading ? "center" : "start"}
         overflowY="auto"
+        transition="all 0.5s ease-in-out" // Add this line
       >
         {loading ? (
           <>

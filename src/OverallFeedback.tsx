@@ -60,7 +60,7 @@ const OverallFeedback: React.FC<OverallFeedbackProps> = ({ interlocutor, text, s
           <Text fontSize="xl" fontWeight="bold" mb={4}>Feedback</Text>
           {feedback && feedback.message.split('\n')
             .filter(line => line.trim() !== '')
-            .map((line, index) => <Text key={index}>{line}</Text>)
+            .map((line, index) => <Text className='para' key={index}>{line}</Text>)
           }
         </>
       )}
