@@ -76,17 +76,22 @@ const Timeseries: React.FC<TimeseriesProps> = ({ participants, text, factors }) 
       {error ? (
         <Text color="red.500">{error}</Text>
       ) : timeSeriesData ? (
-        <VictoryChart scale={{ x: 'linear' }} domainPadding={20}>
-          <VictoryAxis style={{ axis: { stroke: textColor }, tickLabels: { fill: textColor } }} />
-          <VictoryAxis dependentAxis style={{ axis: { stroke: textColor }, tickLabels: { fill: textColor } }} />
-          {participants.map((participant, idx) => (
-            <VictoryLine
-              key={idx}
-              data={plotData.filter((d: { participant: string; }) => d.participant === participant)}
-              style={{ data: { stroke: idx === 0 ? "#FF6347" : "#4682B4" } }}
-            />
-          ))}
-        </VictoryChart>
+        <>
+          <Text color={textColor} fontSize="xl" mb={4}>
+            Plotting: {timeSeriesData.factors[selectedFactorIndex]}
+          </Text>
+          <VictoryChart scale={{ x: 'linear' }} domainPadding={20}>
+            <VictoryAxis style={{ axis: { stroke: textColor }, tickLabels: { fill: textColor } }} />
+            <VictoryAxis dependentAxis style={{ axis: { stroke: textColor }, tickLabels: { fill: textColor } }} />
+            {participants.map((participant, idx) => (
+              <VictoryLine
+                key={idx}
+                data={plotData.filter((d: { participant: string; }) => d.participant === participant)}
+                style={{ data: { stroke: idx === 0 ? "#FF6347" : "#4682B4" } }}
+              />
+            ))}
+          </VictoryChart>
+        </>
       ) : (
         <Text color={textColor}>Loading...</Text>
       )}
