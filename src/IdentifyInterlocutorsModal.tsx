@@ -17,7 +17,7 @@ import {
 
 interface IdentifyInterlocutorsModalProps {
     isOpen: boolean;
-    onIdentificationComplete: (selectedOption: string, participants: string[]) => void;
+    onIdentificationComplete: (selectedOption: string, participants: string[], factors: string[]) => void;
     text: string | null;
     setUserChoicePrompt: (message: string) => void;
 }
@@ -29,48 +29,49 @@ const IdentifyInterlocutorsModal: React.FC<IdentifyInterlocutorsModalProps> = ({
     setUserChoicePrompt,
 }) => {
     const [loading, setLoading] = useState(false);
-    const [isFetching, setIsFetching] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [participants, setParticipants] = useState<string[]>([]);
+    const [factors, setFactors] = useState<string[]>([]); // New state for factors
     const [message, setMessage] = useState<string>('');
 
     useEffect(() => {
-        // Perform the API call only when the modal is opened and text is available
         if (isOpen && text) {
             setLoading(true);
             identifyInterlocutors();
         }
-
-        // Reset states when the modal is closed
         return () => {
             if (!isOpen) {
                 setLoading(false);
                 setError(null);
                 setParticipants([]);
+                setFactors([]); // Reset factors on close
                 setMessage('');
             }
         };
-    }, [isOpen, text]); // Depend only on isOpen and text
+    }, [isOpen, text]);
 
     const identifyInterlocutors = async () => {
         setLoading(true);
         try {
             const response = await axios.post('http://localhost:8000/id-interlocutors', { text });
             const data = response.data.result.split('||');
-            setParticipants([data[0], data[1]]);
-            setMessage(data[2]);
-
+            if (data.length >= 4) {
+                setParticipants([data[0], data[1]]);
+                setFactors([data[2], data[3]]); // Set factors
+                setMessage(data[4]);
+            } else {
+                throw new Error('Error parsing response data.');
+            }
         } catch (error) {
             setError('Error identifying interlocutors.');
         } finally {
             setLoading(false);
-            setIsFetching(false);
         }
     };
 
-    const handleSelection = (selectedOption: string, participants: string[]) => {
+    const handleSelection = (selectedOption: string) => {
         setUserChoicePrompt(`You have selected: ${selectedOption}`);
-        onIdentificationComplete(selectedOption, participants); // Include participants here
+        onIdentificationComplete(selectedOption, participants, factors);
     };
 
     // Vision UI styles
@@ -84,7 +85,7 @@ const IdentifyInterlocutorsModal: React.FC<IdentifyInterlocutorsModalProps> = ({
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={() => { }} size="lg" isCentered closeOnOverlayClick={false}>
+        <Modal isOpen={isOpen} onClose={() => {}} size="lg" isCentered closeOnOverlayClick={false}>
             <ModalOverlay />
             <ModalContent bg={modalBgColor}>
                 <ModalHeader color={textColor}>Identify Interlocutors</ModalHeader>
@@ -101,11 +102,11 @@ const IdentifyInterlocutorsModal: React.FC<IdentifyInterlocutorsModalProps> = ({
                         <>
                             <Text color={textColor}>{message}</Text>
                             {participants.map((participant, index) => (
-                                <Button key={index} colorScheme="blue" style={buttonStyle} onClick={() => handleSelection(participants[index], participants)}>
+                                <Button key={index} colorScheme="blue" style={buttonStyle} onClick={() => handleSelection(participant)}>
                                     {participant}
                                 </Button>
                             ))}
-                            <Button colorScheme="blue" style={buttonStyle} onClick={() => handleSelection('Neither', participants)}>
+                            <Button colorScheme="blue" style={buttonStyle} onClick={() => handleSelection('Neither')}>
                                 Neither
                             </Button>
                         </>

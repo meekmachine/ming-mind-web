@@ -9,12 +9,11 @@ function ResponsePage() {
     const location = useLocation();
     const state = location.state as { text?: string };
     const [convo, setConvo] = useState<string | null>(null);
+    const [startLoading, setStartLoading] = useState<boolean>(false);
     const [selectedInterlocutor, setSelectedInterlocutor] = useState<string | null>(null);
     const [participants, setParticipants] = useState<string[]>([]);
     const [userChoicePrompt, setUserChoicePrompt] = useState<string>('');
     const [factors, setFactors] = useState<string[]>([]);
-    const [showFeedback, setShowFeedback] = useState<boolean>(false);
-    const [showTimeseries, setShowTimeseries] = useState<boolean>(false);
 
     useEffect(() => {
         if (state?.text) {
@@ -22,17 +21,12 @@ function ResponsePage() {
         }
     }, [state]);
 
-    const handleIdentificationComplete = (selectedOption: string, participantNames: string[]) => {
+    const handleIdentificationComplete = (selectedOption: string, participantNames: string[], factorNames: string[]) => {
         setSelectedInterlocutor(selectedOption);
         setParticipants(participantNames);
-        setShowFeedback(true); // Show feedback once a selection is made
+        setFactors(factorNames); // Save the factor names in state
+        setStartLoading(true);
     };
-
-    useEffect(() => {
-        if (factors.length > 0) {
-            setShowTimeseries(true); // Show Timeseries once factors are set
-        }
-    }, [factors]);
 
     const visionUIStyles = {
         pageContainer: {
@@ -51,12 +45,6 @@ function ResponsePage() {
             width: '100%',
             maxWidth: '600px',
         },
-        header: {
-            fontSize: '24px',
-            fontWeight: 'bold',
-            marginBottom: '20px',
-            textAlign: 'center',
-        },
     };
 
     return (
@@ -72,21 +60,23 @@ function ResponsePage() {
                         setUserChoicePrompt={setUserChoicePrompt}
                     />
                 )}
-                <Fade in={showFeedback} unmountOnExit>
-                    <OverallFeedback 
-                        interlocutor={selectedInterlocutor}
-                        text={convo}
-                        setFactors={setFactors}
-                    />
-                </Fade>
-                {showTimeseries && (
-                    <Fade in={true} unmountOnExit>
-                        <Timeseries 
-                            participants={participants}
-                            factors={factors}
-                            text={convo}
-                        />
-                    </Fade>
+                {startLoading && (
+                    <>
+                        <Fade in={true} unmountOnExit>
+                            <OverallFeedback 
+                                interlocutor={selectedInterlocutor}
+                                text={convo}
+                                setFactors={setFactors}
+                            />
+                        </Fade>
+                        <Fade in={true} unmountOnExit>
+                            <Timeseries 
+                                participants={participants}
+                                factors={factors}
+                                text={convo}
+                            />
+                        </Fade>
+                    </>
                 )}
             </Container>
         </Box>

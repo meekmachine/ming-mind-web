@@ -33,8 +33,8 @@ const Timeseries: React.FC<TimeseriesProps> = ({ participants, text, factors }) 
         const response =   await axios.post('http://localhost:8000/timeseries', { 
                     participant1: participants[0], 
                     participant2: participants[1], 
-                    factor1: factors[0], 
-                    factor2: factors[1], 
+                    factor1: factors[selectedFactorIndex], 
+                    factor2: factors[1 - selectedFactorIndex], 
                     text 
                 });
         setTimeSeriesData(JSON.parse(response.data) as TimeSeriesData);
@@ -47,7 +47,7 @@ const Timeseries: React.FC<TimeseriesProps> = ({ participants, text, factors }) 
     if (participants.length && text) {
       fetchData();
     }
-  }, [participants, text]);
+  }, [participants, text, selectedFactorIndex]);
 
   const handleSwitchChange = () => {
     setSelectedFactorIndex(prevIndex => (prevIndex === 0 ? 1 : 0));
@@ -58,7 +58,6 @@ const Timeseries: React.FC<TimeseriesProps> = ({ participants, text, factors }) 
 
   console.log(timeSeriesData);
   const plotData = timeSeriesData ? timeSeriesData.data
-    // .filter((d: { participant: string; }) => participants.includes(d.participant))
     .map((d: { [x: string]: any; utterance: any; participant: any; }) => ({
       x: d.utterance,
       y: d[timeSeriesData.factors[selectedFactorIndex] as keyof UtteranceData], // Type assertion for factor index
