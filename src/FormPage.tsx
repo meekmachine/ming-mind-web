@@ -7,6 +7,7 @@ import FetchConversationModal from './FetchConversationModal';
 import VerificationModal from './VerificationModal';
 import AwryDescriberModal from './AwryDescriberModal';
 import { useNavigation } from 'react-router-dom'; // Import useHistory
+import TopicGraph from './TopicGraph';
 
 function FormPage() {
   const [plainText, setPlainText] = useState('');
@@ -58,6 +59,7 @@ function FormPage() {
       alignItems="center"
       justifyContent="center"
     >
+      <TopicGraph />
       <VStack spacing={4} w="100%" h="100%">
         <Box sx={customStyles}>
           <ReactQuill 

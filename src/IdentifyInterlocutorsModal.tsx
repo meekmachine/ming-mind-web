@@ -31,7 +31,7 @@ const IdentifyInterlocutorsModal: React.FC<IdentifyInterlocutorsModalProps> = ({
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [participants, setParticipants] = useState<string[]>([]);
-    const [factors, setFactors] = useState<string[]>([]); // New state for factors
+    const [factors, setFactors] = useState<string[]>([]); // State for factors
     const [message, setMessage] = useState<string>('');
 
     useEffect(() => {
@@ -39,12 +39,13 @@ const IdentifyInterlocutorsModal: React.FC<IdentifyInterlocutorsModalProps> = ({
             setLoading(true);
             identifyInterlocutors();
         }
+
         return () => {
             if (!isOpen) {
                 setLoading(false);
                 setError(null);
                 setParticipants([]);
-                setFactors([]); // Reset factors on close
+                setFactors([]); // Reset factors
                 setMessage('');
             }
         };
@@ -55,12 +56,12 @@ const IdentifyInterlocutorsModal: React.FC<IdentifyInterlocutorsModalProps> = ({
         try {
             const response = await axios.post('http://localhost:8000/id-interlocutors', { text });
             const data = response.data.result.split('||');
-            if (data.length >= 4) {
+            if (data.length >= 5) {
                 setParticipants([data[0], data[1]]);
-                setFactors([data[2], data[3]]); // Set factors
+                setFactors([data[2], data[3]]); // Set factors from response
                 setMessage(data[4]);
             } else {
-                throw new Error('Error parsing response data.');
+                throw new Error('Invalid data format');
             }
         } catch (error) {
             setError('Error identifying interlocutors.');
@@ -71,10 +72,9 @@ const IdentifyInterlocutorsModal: React.FC<IdentifyInterlocutorsModalProps> = ({
 
     const handleSelection = (selectedOption: string) => {
         setUserChoicePrompt(`You have selected: ${selectedOption}`);
-        onIdentificationComplete(selectedOption, participants, factors);
+        onIdentificationComplete(selectedOption, participants, factors); // Pass both participants and factors
     };
 
-    // Vision UI styles
     const modalBgColor = useColorModeValue('#2D3748', '#1A202C');
     const textColor = useColorModeValue('#FFFFFF', '#E2E8F0');
     const buttonStyle = {
@@ -85,7 +85,7 @@ const IdentifyInterlocutorsModal: React.FC<IdentifyInterlocutorsModalProps> = ({
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={() => {}} size="lg" isCentered closeOnOverlayClick={false}>
+        <Modal isOpen={isOpen} onClose={() => { }} size="lg" isCentered closeOnOverlayClick={false}>
             <ModalOverlay />
             <ModalContent bg={modalBgColor}>
                 <ModalHeader color={textColor}>Identify Interlocutors</ModalHeader>

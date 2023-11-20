@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { VictoryLine, VictoryChart, VictoryAxis } from 'victory';
+import { VictoryLine, VictoryChart, VictoryAxis, VictoryTooltip, VictoryVoronoiContainer } from 'victory';
 import { Box, Switch, FormControl, FormLabel, Text, useColorModeValue } from '@chakra-ui/react';
 
 // Define interfaces
@@ -24,78 +24,100 @@ interface TimeseriesProps {
 const Timeseries: React.FC<TimeseriesProps> = ({ participants, text, factors }) => {
     const [selectedFactorIndex, setSelectedFactorIndex] = useState(0);
     const [timeSeriesData, setTimeSeriesData] = useState<any>(null);
-    const [plotParticipants, setPlotParticipants] = useState<string[]>([]);
     const [error, setError] = useState<string | null>(null);
+    const [parsedUtterances, setParsedUtterances] = useState<string[]>([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response =   await axios.post('http://localhost:8000/timeseries', { 
-                    participant1: participants[0], 
-                    participant2: participants[1], 
-                    factor1: factors[selectedFactorIndex], 
-                    factor2: factors[1 - selectedFactorIndex], 
-                    text 
+    useEffect(() => {
+        // Function to parse text into utterances
+        const parseText = (text:string) => {
+            return text.split('\n').map(line => {
+                // Assuming each line is in the format "username: message"
+                const message = line.split(':').slice(1).join(':').trim();
+                return message;
+            });
+        };
+
+        if (text) {
+            setParsedUtterances(parseText(text));
+        }
+
+        const fetchData = async () => {
+            try {
+                const response = await axios.post('http://localhost:8000/timeseries', {
+                    participant1: participants[0],
+                    participant2: participants[1],
+                    factor1: factors[0],
+                    factor2: factors[1],
+                    text
                 });
-        setTimeSeriesData(JSON.parse(response.data) as TimeSeriesData);
-        setError(null);
-      } catch (error) {
-        setError('Failed to load data. Please try again later.');
-      }
+                setTimeSeriesData(JSON.parse(response.data) as TimeSeriesData);
+                setError(null);
+            } catch (error) {
+                setError('Failed to load data. Please try again later.');
+            }
+        };
+
+        if (participants.length && text) {
+            fetchData();
+        }
+    }, [participants, text, selectedFactorIndex]);
+
+    const handleSwitchChange = () => {
+        setSelectedFactorIndex(prevIndex => (prevIndex === 0 ? 1 : 0));
     };
 
-    if (participants.length && text) {
-      fetchData();
-    }
-  }, [participants, text, selectedFactorIndex]);
+    const bgColor = useColorModeValue('#2D3748', '#1A202C');
+    const textColor = useColorModeValue('#FFFFFF', '#E2E8F0');
 
-  const handleSwitchChange = () => {
-    setSelectedFactorIndex(prevIndex => (prevIndex === 0 ? 1 : 0));
-  };
+    // Update plot data to include utterances
+    const plotData = timeSeriesData ? timeSeriesData.data
+        .map((d:UtteranceData, index:number) => ({
+            x: d.utterance,
+            y: d[timeSeriesData.factors[selectedFactorIndex] as keyof UtteranceData],
+            participant: d.participant,
+            label: parsedUtterances[index] || '' // Adding utterance as label
+        })) : [];
 
-  const bgColor = useColorModeValue('#2D3748', '#1A202C');
-  const textColor = useColorModeValue('#FFFFFF', '#E2E8F0');
-
-  console.log(timeSeriesData);
-  const plotData = timeSeriesData ? timeSeriesData.data
-    .map((d: { [x: string]: any; utterance: any; participant: any; }) => ({
-      x: d.utterance,
-      y: d[timeSeriesData.factors[selectedFactorIndex] as keyof UtteranceData], // Type assertion for factor index
-      participant: d.participant
-    })) : [];
-
-  return (
-    <Box bg={bgColor} p={4} borderRadius="lg">
-      <FormControl display="flex" alignItems="center" mb={4}>
-        <FormLabel htmlFor="factor-switch" mb="0" color={textColor}>
-          Toggle between {timeSeriesData?.factors[0]} and {timeSeriesData?.factors[1]}
-        </FormLabel>
-        <Switch id="factor-switch" onChange={handleSwitchChange} />
-      </FormControl>
-      {error ? (
-        <Text color="red.500">{error}</Text>
-      ) : timeSeriesData ? (
-        <>
-          <Text color={textColor} fontSize="xl" mb={4}>
-            Plotting: {timeSeriesData.factors[selectedFactorIndex]}
-          </Text>
-          <VictoryChart scale={{ x: 'linear' }} domainPadding={20}>
-            <VictoryAxis style={{ axis: { stroke: textColor }, tickLabels: { fill: textColor } }} />
-            <VictoryAxis dependentAxis style={{ axis: { stroke: textColor }, tickLabels: { fill: textColor } }} />
-            {participants.map((participant, idx) => (
-              <VictoryLine
-                key={idx}
-                data={plotData.filter((d: { participant: string; }) => d.participant === participant)}
-                style={{ data: { stroke: idx === 0 ? "#FF6347" : "#4682B4" } }}
-              />
-            ))}
-          </VictoryChart>
-        </>
-      ) : (
-        <Text color={textColor}>Loading...</Text>
-      )}
-    </Box>
-  );
+    return (
+        <Box bg={bgColor} p={4} borderRadius="lg">
+            <FormControl display="flex" alignItems="center" mb={4}>
+                <FormLabel htmlFor="factor-switch" mb="0" color={textColor}>
+                    Toggle between {timeSeriesData?.factors[0]} and {timeSeriesData?.factors[1]}
+                </FormLabel>
+                <Switch id="factor-switch" onChange={handleSwitchChange} />
+            </FormControl>
+            {error ? (
+                <Text color="red.500">{error}</Text>
+            ) : timeSeriesData ? (
+                <>
+                    <Text color={textColor} fontSize="xl" mb={4}>
+                        Plotting: {timeSeriesData.factors[selectedFactorIndex]}
+                    </Text>
+                    <VictoryChart
+                        domainPadding={20}
+                        containerComponent={
+                            <VictoryVoronoiContainer
+                                labels={({ datum }) => datum.label}
+                                labelComponent={<VictoryTooltip cornerRadius={0} flyoutStyle={{ fill: "white" }} />}
+                            />
+                        }
+                    >
+                        <VictoryAxis style={{ axis: { stroke: textColor }, tickLabels: { fill: textColor } }} />
+                        <VictoryAxis dependentAxis style={{ axis: { stroke: textColor }, tickLabels: { fill: textColor } }} />
+                        {participants.map((participant, idx) => (
+                            <VictoryLine
+                                key={idx}
+                                data={plotData.filter((d: { participant: string; }) => d.participant === participant)}
+                                style={{ data: { stroke: idx === 0 ? "#FF6347" : "#4682B4" } }}
+                            />
+                        ))}
+                    </VictoryChart>
+                </>
+            ) : (
+                <Text color={textColor}>Loading...</Text>
+            )}
+        </Box>
+    );
 };
 
 export default Timeseries;

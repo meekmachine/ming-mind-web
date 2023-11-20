@@ -21,6 +21,9 @@ body {
   line-height: 1.5;
 }
 
+text[id^="chart-line"] tspan{
+  visibility: hidden !important;}
+
 /* Spacing and margin styles */
 /* Example: Set default margin and padding to 0 */
 * {
