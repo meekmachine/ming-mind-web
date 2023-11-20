@@ -29,10 +29,14 @@ interface FirestoreData {
     [id: string]: TopicData;
 }
 
-// Firebase configuration
 const firebaseConfig = {
-    // ...your firebase config
-};
+    apiKey: "AIzaSyDaLUX0xrk1hND1r3PJ1tiAzG80jmKAFYg",
+    authDomain: "ming-527ed.firebaseapp.com",
+    projectId: "ming-527ed",
+    storageBucket: "ming-527ed.appspot.com",
+    messagingSenderId: "78727120574",
+    appId: "1:78727120574:web:95eed43cc7579dacdf80ef"
+  };
 
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();

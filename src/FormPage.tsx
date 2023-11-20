@@ -59,7 +59,9 @@ function FormPage() {
       alignItems="center"
       justifyContent="center"
     >
+      <div style={{ height: '100% !important' }}>
       <TopicGraph />
+      </div>
       <VStack spacing={4} w="100%" h="100%">
         <Box sx={customStyles}>
           <ReactQuill 
