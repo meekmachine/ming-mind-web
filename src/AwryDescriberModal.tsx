@@ -18,10 +18,6 @@ const AwryDescriberModal = ({ isOpen, onClose, conversationData }: AwryDescriber
   useEffect(() => {
     if (isOpen && conversationData) {
       setLoading(true);
-      audio.currentTime = 0;
-      audio.play();
-      setTimeout(() => audio.pause(), 1800); // Stop the audio after 1.8 seconds
-
       fetchDescription();
     }
   }, [isOpen, conversationData]);
@@ -29,23 +25,16 @@ const AwryDescriberModal = ({ isOpen, onClose, conversationData }: AwryDescriber
   useEffect(() => {
     if (description !== null) {
       setShouldSlideUp(true);
+      playAudio(); // Play audio after description is set
     }
   }, [description]);
 
-  useEffect(() => {
-    if (isOpen) {
-      // Play opening sound effect
-      audio.currentTime = 0;
-      audio.play();
-    } else {
-      // Play closing sound effect
-      audio.currentTime = 2.1;
-      audio.play();
-    }
-  }, [isOpen]);
+  const playAudio = () => {
+    audio.currentTime = 0;
+    audio.play();
+  };
 
   const formatConversation = (conversationData: any[]) => {
-    // Assuming each message in conversationData has 'speaker' and 'text'
     return conversationData.map((msg) => `${msg.speaker}: ${msg.text}`).join('\n');
   };
 
@@ -82,7 +71,7 @@ const AwryDescriberModal = ({ isOpen, onClose, conversationData }: AwryDescriber
         alignItems="center"
         justifyContent={loading ? "center" : "start"}
         overflowY="auto"
-        transition="all 0.5s ease-in-out" // Add this line
+        transition="all 0.5s ease-in-out"
       >
         {loading ? (
           <>

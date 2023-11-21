@@ -22,10 +22,9 @@ const OverallFeedback: React.FC<OverallFeedbackProps> = ({ interlocutor, text, s
       setIsLoading(true);
       try {
         const response = await axios.post('http://localhost:8000/feedback', { interlocutor, text });
-        const responseData = response.data.result.split('||');
+        const responseData = response.data.result;
         if (responseData.length >= 3) {
-          setFactors([responseData[0].trim(), responseData[1].trim()]);
-          setFeedback({ message: responseData[2].trim() });
+          setFeedback({ message: responseData });
         } else {
           throw new Error('Invalid feedback data format');
         }

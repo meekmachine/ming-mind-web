@@ -6,8 +6,8 @@ import 'react-quill/dist/quill.snow.css';
 import FetchConversationModal from './FetchConversationModal';
 import VerificationModal from './VerificationModal';
 import AwryDescriberModal from './AwryDescriberModal';
-import { useNavigation } from 'react-router-dom'; // Import useHistory
-import TopicGraph from './TopicGraph';
+import useTypingEffect from './TypingEffect'; // Import the TypingEffect component
+
 
 function FormPage() {
   const [plainText, setPlainText] = useState('');
@@ -17,13 +17,29 @@ function FormPage() {
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [showDescriberModal, setShowDescriberModal] = useState(false);
   const quillRef = useRef(null);
-  const navigate = useNavigate(); // Create the history object
+  const navigate = useNavigate();
+
+  // Function to strip HTML tags
+  const stripHtml = (htmlString: string) => {
+    const temporalDivElement = document.createElement("div");
+    temporalDivElement.innerHTML = htmlString;
+    return temporalDivElement.textContent || temporalDivElement.innerText || "";
+  };
+
+
+  const handleEditorChange = (content: string) => {
+    setFormattedText(content);
+    setPlainText(prevState => {
+      const plainTextContent = stripHtml(content);
+      return plainTextContent;
+    });
+  };
 
   const handleSubmit = () => {
     setShowVerificationModal(true);
   };
 
-  const handleFetchConversation = (conversationResponse: any) => {
+  const handleFetchConversation = (conversationResponse: { plainText: React.SetStateAction<string>; formattedText: React.SetStateAction<string>; json: any; }) => {
     setPlainText(conversationResponse.plainText);
     setFormattedText(conversationResponse.formattedText);
     setConversationJson(conversationResponse.json);
@@ -31,74 +47,32 @@ function FormPage() {
     setShowDescriberModal(true);
   };
 
-
-
-  // Custom styles for ReactQuill editor
   const customStyles = {
-    '.quill': { 
-      border: 'none',
-      fontFamily: "'Press Start 2P', monospace", // Apply the pixel font
-    },
+    '.quill': { border: 'none', fontFamily: "'Press Start 2P', monospace" },
     '.ql-editor': {
-      height: 'calc(100vh - 50px)', // Full height minus some space for buttons
-      backgroundColor: '#4a4b52', // Background color
-      color: 'white', // Text color
+      height: 'calc(100vh - 50px)',
+      backgroundColor: '#4a4b52',
+      color: 'white',
     },
-    '.ql-toolbar': {
-      display: 'none', // Hide the toolbar
-    }
+    '.ql-toolbar': { display: 'none' }
   };
+  useTypingEffect(setFormattedText);
 
   return (
-    <Box
-      w="100vw"
-      h="100vh"
-      bg="#4a4b52"
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      justifyContent="center"
-    >
-      <div style={{ height: '100% !important' }}>
-      <TopicGraph />
-      </div>
+    <Box w="100vw" h="100vh" bg="#4a4b52" display="flex" flexDirection="column" alignItems="center" justifyContent="center">
       <VStack spacing={4} w="100%" h="100%">
-        <Box sx={customStyles}>
-          <ReactQuill 
-            ref={quillRef}
-            value={formattedText}
-            onChange={setFormattedText}
-            readOnly={false}
-            theme="snow"
-          />
+        <Box sx={customStyles} w="100%" h="100%">
+
+          <ReactQuill ref={quillRef} value={formattedText} onChange={handleEditorChange} readOnly={false} theme="snow" />
         </Box>
         <HStack position="absolute" bottom="20px">
-          <Button colorScheme="blue" onClick={handleSubmit}>
-            Submit
-          </Button>
-          <Button colorScheme="green" onClick={() => setShowFetchModal(true)}>
-            Fetch Conversation
-          </Button>
+          <Button colorScheme="blue" onClick={handleSubmit}>Submit</Button>
+          <Button colorScheme="green" onClick={() => setShowFetchModal(true)}>Fetch Conversation</Button>
         </HStack>
       </VStack>
-
-      <FetchConversationModal
-        isOpen={showFetchModal}
-        onClose={() => setShowFetchModal(false)}
-        onFetchConversation={handleFetchConversation}
-      />
-
-      <VerificationModal
-        plainText={plainText}
-        isOpen={showVerificationModal}
-        onClose={() => setShowVerificationModal(false)}
-      />
-
-      <AwryDescriberModal
-        isOpen={showDescriberModal}
-        onClose={() => setShowDescriberModal(false)}
-        conversationData={conversationJson}
-      />
+      <FetchConversationModal isOpen={showFetchModal} onClose={() => setShowFetchModal(false)} onFetchConversation={handleFetchConversation} />
+      <VerificationModal plainText={plainText} isOpen={showVerificationModal} onClose={() => setShowVerificationModal(false)} />
+      <AwryDescriberModal isOpen={showDescriberModal} onClose={() => setShowDescriberModal(false)} conversationData={conversationJson} />
     </Box>
   );
 }

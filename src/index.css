@@ -8,11 +8,16 @@
   padding: 0;
   box-sizing: border-box;
 }
-
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 /* Remove list styles (e.g., bullets) from unordered lists */
 ul, ol {
   list-style: none;
 }
+.ql-container.ql-snow{
+  border: none !important;
+  font-family: "Press Start 2P", cursive;
+}
+
 
 /* Reset typography styles */
 body {
@@ -21,8 +26,8 @@ body {
   line-height: 1.5;
 }
 
-text[id^="chart-line"] tspan{
-  visibility: hidden !important;}
+text[id^="chart-line"]{
+  display: none !important;}
 
 /* Spacing and margin styles */
 /* Example: Set default margin and padding to 0 */

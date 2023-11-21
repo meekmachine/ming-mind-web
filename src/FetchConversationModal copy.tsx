@@ -10,11 +10,14 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  Slider,
+  SliderTrack,
+  SliderThumb,
+  SliderFilledTrack,
   Text,
   VStack,
   ModalFooter,
 } from '@chakra-ui/react';
-import TopicGraph from './TopicGraph/TopicGraph';
 
 type FetchConversationModalProps = {
   isOpen: boolean;
@@ -35,6 +38,28 @@ function FetchConversationModal({
     .domain([0, 1])
     .range(['aqua', 'magenta']);
 
+  const fetchConversation = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/get-convo', {
+        params: {
+          'min-toxicity': minToxicity,
+          'min-messages': minMessages,
+          'has-personal-attack': hasPersonalAttack,
+        },
+      });
+      const formattedConversation = formatConversation(response.data);
+      const plainTextConversation = response.data.map((msg: { speaker: any; text: any; }) => `${msg.speaker}: ${msg.text}`).join('\n');
+
+      onFetchConversation({ 
+        formattedText: formattedConversation, 
+        plainText: plainTextConversation,
+        json: response.data 
+      });
+    } catch (error) {
+      console.error('Error fetching conversation:', error);
+    }
+  };
+
   const formatConversation = (conversationData: any[]) => {
     return conversationData.map(msg => {
       const toxicColor = colorScale(msg["meta.toxicity"]);
@@ -43,25 +68,12 @@ function FetchConversationModal({
     }).join('');
   };
 
-  const fetchConversation = async () => {
-    // Your logic to fetch the conversation
-    // Placeholder logic for demonstration
-    const dummyData = [{ speaker: 'User1', text: 'Hello' }, { speaker: 'User2', text: 'Hi there!' }];
-    const formattedData = formatConversation(dummyData);
-    onFetchConversation({ formattedText: formattedData, plainText: formattedData, json: dummyData });
-  };
-
-  // Custom Vision UI Styles with full width and height
+  // Custom Vision UI Styles
   const visionUIStyles = {
     modalContent: {
       backgroundColor: '#333', // Dark background
       color: 'white', // Light text color
-      width: '100vw', // Full viewport width
-      height: '100vh', // Full viewport height
-      margin: 0, // Remove margin
-      borderRadius: 0, // Remove border radius for full screen
-      maxW: '100vw', // Ensure max width is 100% of viewport
-      maxH: '100vh', // Ensure max height is 100% of viewport
+      borderRadius: '8px', // Smooth edges
     },
     header: {
       borderBottom: '1px solid #444', // Subtle separation
@@ -71,11 +83,19 @@ function FetchConversationModal({
       borderTop: '1px solid #444',
       paddingTop: '0.5rem',
     },
-    // ... other styles ...
+    sliderTrack: {
+      backgroundColor: '#555', // Dark track
+    },
+    sliderFilled: {
+      backgroundColor: '#4A90E2', // Accent color for filled part
+    },
+    sliderThumb: {
+      backgroundColor: '#4A90E2', // Matching thumb color
+    },
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="full">
+    <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent sx={visionUIStyles.modalContent}>
         <ModalHeader sx={visionUIStyles.header}>Fetch Conversation</ModalHeader>
@@ -86,10 +106,40 @@ function FetchConversationModal({
               This tool fetches conversations from the Conversations Gone Awry (CGA) corpus, 
               a dataset used to study how online interactions can escalate into toxic or harmful exchanges.
             </Text>
-            <TopicGraph />
+            <Text>Minimum Toxicity Score (0 to 1):</Text>
+            <Slider
+              value={minToxicity}
+              onChange={setMinToxicity}
+              min={0}
+              max={1}
+              step={0.1}>
+              <SliderTrack>
+                <SliderFilledTrack />
+              </SliderTrack>
+              <SliderThumb />
+            </Slider>
+
+            <Text>Minimum Number of Messages:</Text>
+            <Slider
+              value={minMessages}
+              onChange={setMinMessages}
+              min={0}
+              max={100}
+              step={1}>
+              <SliderTrack>
+                <SliderFilledTrack />
+              </SliderTrack>
+              <SliderThumb />
+            </Slider>
+
+            <Checkbox
+              isChecked={hasPersonalAttack}
+              onChange={(e) => setHasPersonalAttack(e.target.checked)}>
+              Include Personal Attacks
+            </Checkbox>
           </VStack>
         </ModalBody>
-        <ModalFooter sx={visionUIStyles.footer}>
+        <ModalFooter>
           <Button colorScheme="blue" onClick={fetchConversation}>
             Fetch
           </Button>

@@ -11,7 +11,6 @@ interface UtteranceData {
 }
 
 interface TimeSeriesData {
-  factors: string[];
   data: UtteranceData[];
 }
 
@@ -30,12 +29,9 @@ const Timeseries: React.FC<TimeseriesProps> = ({ participants, text, factors }) 
     useEffect(() => {
         // Function to parse text into utterances
         const parseText = (text:string) => {
-            return text.split('\n').map(line => {
-                // Assuming each line is in the format "username: message"
-                const message = line.split(':').slice(1).join(':').trim();
-                return message;
-            });
-        };
+            console.log(text)
+            return text.split(':').map(l=>l.replace(participants[0], '').replace(participants[1], ''));
+}
 
         if (text) {
             setParsedUtterances(parseText(text));
@@ -54,6 +50,7 @@ const Timeseries: React.FC<TimeseriesProps> = ({ participants, text, factors }) 
                 setError(null);
             } catch (error) {
                 setError('Failed to load data. Please try again later.');
+                console.error(error);
             }
         };
 
@@ -65,24 +62,32 @@ const Timeseries: React.FC<TimeseriesProps> = ({ participants, text, factors }) 
     const handleSwitchChange = () => {
         setSelectedFactorIndex(prevIndex => (prevIndex === 0 ? 1 : 0));
     };
+    // Clear plot data from state when page reloads
+    window.onbeforeunload = () => {
+        setTimeSeriesData(null);
+        setParsedUtterances([] )
+    };
 
     const bgColor = useColorModeValue('#2D3748', '#1A202C');
     const textColor = useColorModeValue('#FFFFFF', '#E2E8F0');
-
+    console.log(timeSeriesData);
     // Update plot data to include utterances
+    console.log(parsedUtterances)
     const plotData = timeSeriesData ? timeSeriesData.data
         .map((d:UtteranceData, index:number) => ({
             x: d.utterance,
-            y: d[timeSeriesData.factors[selectedFactorIndex] as keyof UtteranceData],
+            y: d[factors[selectedFactorIndex].trim()],
             participant: d.participant,
             label: parsedUtterances[index] || '' // Adding utterance as label
         })) : [];
+        console.log(...factors);
 
+    console.log(plotData);
     return (
         <Box bg={bgColor} p={4} borderRadius="lg">
             <FormControl display="flex" alignItems="center" mb={4}>
                 <FormLabel htmlFor="factor-switch" mb="0" color={textColor}>
-                    Toggle between {timeSeriesData?.factors[0]} and {timeSeriesData?.factors[1]}
+                    Toggle between {factors[0]} and {factors[1]}
                 </FormLabel>
                 <Switch id="factor-switch" onChange={handleSwitchChange} />
             </FormControl>
@@ -91,14 +96,14 @@ const Timeseries: React.FC<TimeseriesProps> = ({ participants, text, factors }) 
             ) : timeSeriesData ? (
                 <>
                     <Text color={textColor} fontSize="xl" mb={4}>
-                        Plotting: {timeSeriesData.factors[selectedFactorIndex]}
+                        Plotting: {factors[selectedFactorIndex]}
                     </Text>
                     <VictoryChart
                         domainPadding={20}
                         containerComponent={
                             <VictoryVoronoiContainer
                                 labels={({ datum }) => datum.label}
-                                labelComponent={<VictoryTooltip cornerRadius={0} flyoutStyle={{ fill: "white" }} />}
+                                labelComponent={<VictoryTooltip cornerRadius={3} flyoutStyle={{ fill: "white" }} />}
                             />
                         }
                     >
@@ -107,7 +112,7 @@ const Timeseries: React.FC<TimeseriesProps> = ({ participants, text, factors }) 
                         {participants.map((participant, idx) => (
                             <VictoryLine
                                 key={idx}
-                                data={plotData.filter((d: { participant: string; }) => d.participant === participant)}
+                                data={plotData.filter((d :UtteranceData) => d.participant.trim() == participant)}
                                 style={{ data: { stroke: idx === 0 ? "#FF6347" : "#4682B4" } }}
                             />
                         ))}
