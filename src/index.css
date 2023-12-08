@@ -9,15 +9,34 @@
   box-sizing: border-box;
 }
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('ming.css');
+
 /* Remove list styles (e.g., bullets) from unordered lists */
 ul, ol {
   list-style: none;
+}
+p.chakra-text.css-0 {
+  margin: 0.8em 0;
 }
 .ql-container.ql-snow{
   border: none !important;
   font-family: "Press Start 2P", cursive;
 }
-
+.ql-editor p{
+  font-size: 22px !important;
+  margin: 1.6em 0 !important;
+}
+.ql-editor h1{
+  font-size: 92px !important;
+}
+.ql-editor a{
+  color: rgb(20, 235, 255) !important;
+  cursor: pointer
+}
+.ql-editor em em em{
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 44px !important;
+}
 
 /* Reset typography styles */
 body {

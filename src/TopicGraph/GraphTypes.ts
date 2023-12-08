@@ -2,12 +2,14 @@
 export interface GraphNode {
     id: string;
     name: string;
+    color: string;
 }
 
 export interface GraphLink {
     source: string;
     target: string;
     strength: number;
+    color: string;
 }
 
 export interface GraphData {

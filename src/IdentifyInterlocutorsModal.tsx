@@ -88,7 +88,7 @@ const IdentifyInterlocutorsModal: React.FC<IdentifyInterlocutorsModalProps> = ({
         <Modal isOpen={isOpen} onClose={() => { }} size="lg" isCentered closeOnOverlayClick={false}>
             <ModalOverlay />
             <ModalContent bg={modalBgColor}>
-                <ModalHeader color={textColor}>Identify Interlocutors</ModalHeader>
+                <ModalHeader color={textColor}>Getting to know you...</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
                     {loading ? (
