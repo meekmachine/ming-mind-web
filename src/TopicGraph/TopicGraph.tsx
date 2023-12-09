@@ -7,7 +7,12 @@ import { createTextMaterial } from './ThreeCustomElements';
 import { getDocs, collection, QueryDocumentSnapshot } from 'firebase/firestore';
 import { GraphData, TopicData, FirestoreData, GraphNode } from './GraphTypes';
 
-const TopicGraph: React.FC = () => {
+interface TopicGraphProps {
+    onFetchConversation: (conversation: { formattedText: string; plainText: string; json: any }) => void;
+    onNodeClick: (nodeId: string) => void;
+}
+
+const TopicGraph: React.FC<TopicGraphProps> = ({ onFetchConversation, onNodeClick }) => {
     const graphRef = useRef<HTMLDivElement>(null);
     const [expandedNode, setExpandedNode] = useState<string | null>(null);
     const [graphData, setGraphData] = useState<GraphData>({ nodes: [], links: [] });
@@ -41,22 +46,19 @@ const TopicGraph: React.FC = () => {
                 sprite.scale.set(40, 20, 1);
                 return sprite;
             })
-     
             .linkColor(() => 'white')
-            .onNodeClick(async (node: any) => {
-                await toggleNodeExpansion(
-                    (node as GraphNode).id, 
-                    graphData, 
-                    setGraphData,
-                    rawData
-                );
-
-                setExpandedNode(expandedNode === (node as GraphNode).id ? null : (node as GraphNode).id);
+            .onNodeClick((node: GraphNode) => {
+                if (node.id.includes('conv')) {
+                    onNodeClick(node.id);
+                } else {
+                    toggleNodeExpansion(node.id, graphData, setGraphData, rawData);
+                    setExpandedNode(expandedNode === node.id ? null : node.id);
+                }
             });
 
         // Additional graph setup
 
-    }, [graphData, expandedNode]);
+    }, [graphData, expandedNode, onFetchConversation, onNodeClick]);
 
     return <div ref={graphRef} style={{ width: '100%', height: '100%', position: 'absolute' }} />;
 };
