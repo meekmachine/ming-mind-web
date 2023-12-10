@@ -110,7 +110,7 @@ function FetchConversationModal({
           <VStack spacing={4}>
 
             <Text>Minimum Toxicity Score (0 to 1): {minToxicity.toFixed(1)}</Text>
-
+            <Text>
               This tool fetches conversations from the Conversations Gone Awry (CGA) corpus, 
               a dataset used to study how online interactions can escalate into toxic or harmful exchanges.
             </Text>
