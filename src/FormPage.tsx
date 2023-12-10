@@ -7,13 +7,13 @@ import VerificationModal from './VerificationModal';
 import AwryDescriberModal from './AwryDescriberModal';
 import useTypingEffect from './TypingEffect';
 import FetchConversationModalClassic from './FetchConversationModalClassic';
-import Ming from './Ming';
+// import Ming from './Ming';
 
 function FormPage() {
   const [plainText, setPlainText] = useState('');
   const [formattedText, setFormattedText] = useState('');
   const [conversationJson, setConversationJson] = useState<any[]>([]);
-  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string>(''); // Initialized as an empty string
   const [showFetchModal, setShowFetchModal] = useState(false);
   const [showClassicModal, setShowClassicModal] = useState(false);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
@@ -70,9 +70,9 @@ function FormPage() {
       </VStack>
       <FetchConversationModal isOpen={showFetchModal} onClose={() => setShowFetchModal(false)} onFetchConversation={handleFetchConversation} />
       <FetchConversationModalClassic isOpen={showClassicModal} onClose={() => setShowClassicModal(false)} onFetchConversation={handleFetchConversation} />
-      <VerificationModal plainText={plainText} isOpen={showVerificationModal} onClose={() => setShowVerificationModal(false)} sessionId={sessionId} />
+      <VerificationModal plainText={plainText} isOpen={showVerificationModal} onClose={() => setShowVerificationModal(false)} sessionId={sessionId || ''} />
       <AwryDescriberModal onClose={() => {}} conversationData={conversationJson} />
-      <Ming isShown={undefined} setIsShown={undefined}/>
+      {/* <Ming isShown={undefined} setIsShown={undefined}/> */}
     </Box>
   );
 }

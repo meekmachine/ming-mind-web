@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
@@ -35,10 +35,9 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
   });
   const navigate = useNavigate();
 
-  const verifyConversation = async () => {
+  const verifyConversation = useCallback(async () => {
     setLoading(true);
     try {
-      // Include session ID in the request if available
       const response = await axios.post('http://localhost:8000/is-mingable', { 
         text: plainText, 
         session_id: sessionId 
@@ -58,13 +57,14 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [plainText, sessionId]); // Dependencies of verifyConversation
 
   useEffect(() => {
     if (isOpen && plainText) {
       verifyConversation();
     }
-  }, [isOpen, plainText]);
+  }, [isOpen, plainText, verifyConversation]); // Added verifyConversation as a dependency
+
 
   const handleGoToAnalysis = () => {
     if (verificationResult.valid) {

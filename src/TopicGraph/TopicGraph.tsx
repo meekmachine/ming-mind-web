@@ -47,12 +47,13 @@ const TopicGraph: React.FC<TopicGraphProps> = ({ onFetchConversation, onNodeClic
                 return sprite;
             })
             .linkColor(() => 'white')
-            .onNodeClick((node: GraphNode) => {
-                if (node.id.includes('conv')) {
-                    onNodeClick(node.id);
+            .onNodeClick((node: any) => { // Changed to 'any' to match expected signature
+                const graphNode = node as GraphNode; // Type assertion to GraphNode
+                if (graphNode.id.includes('conv')) {
+                    onNodeClick(graphNode.id);
                 } else {
-                    toggleNodeExpansion(node.id, graphData, setGraphData, rawData);
-                    setExpandedNode(expandedNode === node.id ? null : node.id);
+                    toggleNodeExpansion(graphNode.id, graphData, setGraphData, rawData);
+                    setExpandedNode(expandedNode === graphNode.id ? null : graphNode.id);
                 }
             });
 
