@@ -35,12 +35,6 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
   });
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (isOpen && plainText) {
-      verifyConversation();
-    }
-  }, [isOpen, plainText]);
-
   const verifyConversation = async () => {
     setLoading(true);
     try {
@@ -65,6 +59,12 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (isOpen && plainText) {
+      verifyConversation();
+    }
+  }, [isOpen, plainText]);
 
   const handleGoToAnalysis = () => {
     if (verificationResult.valid) {
