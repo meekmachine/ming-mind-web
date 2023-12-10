@@ -3,91 +3,66 @@ import axios from 'axios';
 import { Box, Text, Slide, Spinner, Button, useTheme } from '@chakra-ui/react';
 
 type AwryDescriberModalProps = {
-  isOpen: boolean;
   onClose: () => void;
   conversationData: any[];
 };
 
-const AwryDescriberModal = ({ isOpen, onClose, conversationData }: AwryDescriberModalProps) => {
+const AwryDescriberModal = ({ onClose, conversationData }: AwryDescriberModalProps) => {
   const [description, setDescription] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [autoOpen, setAutoOpen] = useState(false);
   const [audio] = useState(new Audio('window.mp3'));
   const theme = useTheme();
-  const [shouldSlideUp, setShouldSlideUp] = useState(false);
 
   useEffect(() => {
-    if (isOpen && conversationData) {
+    if (conversationData.length > 0) {
       setLoading(true);
       fetchDescription();
     }
-  }, [isOpen, conversationData]);
+  }, [conversationData]);
 
   useEffect(() => {
-    if (description !== null) {
-      setShouldSlideUp(true);
-      playAudio(); // Play audio after description is set
+    if (autoOpen) {
+      playAudio(0, 1800); // Play audio for 1800ms when the modal opens
     }
-  }, [description]);
+  }, [autoOpen]);
 
-  const playAudio = () => {
-    audio.currentTime = 0;
+  const playAudio = (start: number, duration: number) => {
+    audio.currentTime = start;
     audio.play();
-  };
-
-  const formatConversation = (conversationData: any[]) => {
-    return conversationData.map((msg) => `${msg.speaker}: ${msg.text}`).join('\n');
+    if (duration) {
+      setTimeout(() => {
+        audio.pause();
+      }, duration);
+    }
   };
 
   const fetchDescription = async () => {
     try {
       const formattedData = formatConversation(conversationData);
-      const response = await axios.post('http://localhost:8000/awry-describer', { data: formattedData });
-      setDescription(response.data);
+      const response = await axios.post('http://localhost:8000/awry-describer', { text: formattedData });
+      setDescription(response.data.result);
       setLoading(false);
+      setAutoOpen(true);
     } catch (error) {
       setDescription("Failed to fetch the description.");
       setLoading(false);
     }
   };
 
-  const closeAwryModal = () => {
-    onClose();
+  const formatConversation = (conversationData: any[]) => {
+    return conversationData.map((msg) => `${msg.speaker}: ${msg.text}`).join('\n');
   };
 
-  if (!isOpen) {
-    return null;
-  }
+  const closeAwryModal = () => {
+    onClose();
+    playAudio(2.1, 0); // Play audio from 2.1s when closing the modal
+    setAutoOpen(false);
+  };
 
   return (
-    <Slide direction="bottom" in={shouldSlideUp} style={{ zIndex: 99 }} unmountOnExit>
-      <Box
-        w="100vw"
-        h="50vh"
-        bg={theme.colors.gray[800]}
-        color={theme.colors.gray[50]}
-        p={4}
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent={loading ? "center" : "start"}
-        overflowY="auto"
-        transition="all 0.5s ease-in-out"
-      >
-        {loading ? (
-          <>
-            <Spinner color="blue.500" />
-            <Text>Loading description...</Text>
-          </>
-        ) : (
-          <Box p={4} w="100%" maxW="600px">
-            <Text fontSize="lg" mb={2}>Overview</Text>
-            <Text mb={4}>{description}</Text>
-            <Button colorScheme="blue" onClick={closeAwryModal}>
-              Close
-            </Button>
-          </Box>
-        )}
-      </Box>
+    <Slide direction="bottom" in={autoOpen} style={{ zIndex: 99 }} unmountOnExit>
+      {/* Rest of the modal content */}
     </Slide>
   );
 };

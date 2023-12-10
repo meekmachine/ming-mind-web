@@ -5,14 +5,14 @@ import { Box, Text, Spinner, Alert, AlertIcon, AlertDescription } from '@chakra-
 interface OverallFeedbackProps {
   interlocutor: string | null;
   text: string | null;
-  setFactors: (factors: string[]) => void;
+  factors: string[]; // New prop
 }
 
 interface FeedbackResponse {
   message: string;
 }
 
-const OverallFeedback: React.FC<OverallFeedbackProps> = ({ interlocutor, text, setFactors }) => {
+const OverallFeedback: React.FC<OverallFeedbackProps> = ({ interlocutor, text, factors }) => {
   const [feedback, setFeedback] = useState<FeedbackResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -21,7 +21,12 @@ const OverallFeedback: React.FC<OverallFeedbackProps> = ({ interlocutor, text, s
     const fetchFeedback = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.post('http://localhost:8000/feedback', { interlocutor, text });
+        const response = await axios.post('http://localhost:8000/feedback', {
+          interlocutor: interlocutor,
+          text: text,
+          factor1: factors[0],
+          factor2: factors[1] // Using the factors prop
+        });
         const responseData = response.data.result;
         if (responseData.length >= 3) {
           setFeedback({ message: responseData });
@@ -34,18 +39,18 @@ const OverallFeedback: React.FC<OverallFeedbackProps> = ({ interlocutor, text, s
       setIsLoading(false);
     };
 
-    if (interlocutor && text) {
+    if (interlocutor && text && factors.length) {
       fetchFeedback();
     }
-  }, [interlocutor, text, setFactors]);
+  }, [interlocutor, text, factors]);
 
   return (
     <Box
-      bg="#2D3748" // Dark background color
-      color="#fff" // White text color
-      p={4} // Padding
-      borderRadius="lg" // Rounded corners
-      my={4} // Margin top and bottom
+      bg="#2D3748"
+      color="#fff"
+      p={4}
+      borderRadius="lg"
+      my={4}
     >
       {isLoading ? (
         <Spinner color="blue.500" />
@@ -59,7 +64,7 @@ const OverallFeedback: React.FC<OverallFeedbackProps> = ({ interlocutor, text, s
           <Text fontSize="xl" fontWeight="bold" mb={4}>Feedback</Text>
           {feedback && feedback.message.split('\n')
             .filter(line => line.trim() !== '')
-            .map((line, index) => <Text className='para' key={index}>{line}</Text>)
+            .map((line, index) => <Text key={index}>{line}</Text>)
           }
         </>
       )}

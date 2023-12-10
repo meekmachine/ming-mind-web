@@ -55,6 +55,12 @@ function FetchConversationModal({
         plainText: plainTextConversation,
         json: response.data 
       });
+
+      
+
+      onClose(); // Close the modal after successful fetch
+
+        
     } catch (error) {
       console.error('Error fetching conversation:', error);
     }
@@ -102,11 +108,14 @@ function FetchConversationModal({
         <ModalCloseButton />
         <ModalBody>
           <VStack spacing={4}>
-            <Text fontSize="md">
+
+            <Text>Minimum Toxicity Score (0 to 1): {minToxicity.toFixed(1)}</Text>
+
               This tool fetches conversations from the Conversations Gone Awry (CGA) corpus, 
               a dataset used to study how online interactions can escalate into toxic or harmful exchanges.
             </Text>
             <Text>Minimum Toxicity Score (0 to 1):</Text>
+
             <Slider
               value={minToxicity}
               onChange={setMinToxicity}
@@ -119,7 +128,9 @@ function FetchConversationModal({
               <SliderThumb />
             </Slider>
 
-            <Text>Minimum Number of Messages:</Text>
+
+            <Text>Minimum Number of Messages: {minMessages}</Text>
+
             <Slider
               value={minMessages}
               onChange={setMinMessages}
@@ -135,7 +146,8 @@ function FetchConversationModal({
             <Checkbox
               isChecked={hasPersonalAttack}
               onChange={(e) => setHasPersonalAttack(e.target.checked)}>
-              Include Personal Attacks
+
+              Include Personal Attacks: {hasPersonalAttack ? 'Yes' : 'No'}
             </Checkbox>
           </VStack>
         </ModalBody>

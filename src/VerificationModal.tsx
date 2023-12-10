@@ -15,16 +15,17 @@ import {
 } from '@chakra-ui/react';
 
 interface VerificationModalProps {
-// Formatted text (HTML)
-  plainText: string;     // Plain text for verification
+  plainText: string;
   isOpen: boolean;
   onClose: () => void;
+  sessionId: string;  // New prop for session ID
 }
 
 const VerificationModal: React.FC<VerificationModalProps> = ({
-  plainText,     // New prop for plain text
+  plainText,
   isOpen,
   onClose,
+  sessionId,  // Use the session ID in the component
 }) => {
   const [loading, setLoading] = useState(false);
   const [verificationResult, setVerificationResult] = useState({
@@ -35,7 +36,7 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isOpen && plainText) { // Use plainText for verification
+    if (isOpen && plainText) {
       verifyConversation();
     }
   }, [isOpen, plainText]);
@@ -43,7 +44,11 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
   const verifyConversation = async () => {
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:8000/is-mingable', { text: plainText });
+      // Include session ID in the request if available
+      const response = await axios.post('http://localhost:8000/is-mingable', { 
+        text: plainText, 
+        session_id: sessionId 
+      });
       const isValid = response.data.valid;
       setVerificationResult({
         status: isValid ? 'success' : 'error',
@@ -63,7 +68,9 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
 
   const handleGoToAnalysis = () => {
     if (verificationResult.valid) {
-      navigate('/response', { state: { text: plainText } }); // Navigate with the formatted text to the response page
+      navigate('/response', { 
+        state: { text: plainText, session_id: sessionId } // Pass session ID to the response page
+      });
     }
   };
 

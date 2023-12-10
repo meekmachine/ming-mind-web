@@ -24,7 +24,7 @@ function ResponsePage() {
     const handleIdentificationComplete = (selectedOption: string, participantNames: string[], factorNames: string[]) => {
         setSelectedInterlocutor(selectedOption);
         setParticipants(participantNames);
-        setFactors(factorNames); // Save the factor names in state
+        setFactors(factorNames);
         setStartLoading(true);
     };
 
@@ -66,7 +66,7 @@ function ResponsePage() {
                             <OverallFeedback 
                                 interlocutor={selectedInterlocutor}
                                 text={convo}
-                                setFactors={setFactors}
+                                factors={factors} // Passing factors as prop
                             />
                         </Fade>
                         <Fade in={true} unmountOnExit>

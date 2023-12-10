@@ -1,0 +1,259 @@
+/* Base styles for .ql-editor h1 strong */
+.ql-editor h1{
+    position: relative;
+    perspective: 500px;
+}
+.ql-editor h1 strong {
+    /* filter: drop-shadow(5px 45px 10px rgb(69, 17, 52)); */
+    display: inline-block;
+    font-size: 95px; /* Updated font size */
+    vertical-align: middle;
+    position: absolute;
+    color: #fff; 
+    transform-style: preserve-3d;/* Initial text color */
+    animation:  heart-animation 1s infinite ease-in-out 6s, rainbow-glow 11s linear infinite, spin 45s linear infinite;
+    /* text-shadow: 
+    1px 1px 0px #000,
+    2px 2px 0px #501414,
+    3px 3px 0px #000,
+    4px 4px 0px #000,
+    5px 5px 0px #000;  */
+  }
+  
+  /* Bounce animation class */
+  .bounce-animation {
+    animation: bounce 4s ease-in-out infinite;
+  }
+  
+  @keyframes bounce {
+    0%, 100% {
+  
+      transform: translateZ(-10px) ;
+    }
+    50% {
+
+      transform: translateZ(100px);
+    }
+  }
+  
+  /* Twist animation class */
+  .twist-animation {
+    animation: twist 9s ease-in-out infinite;
+  }
+  /* Keyframes for turning left and right combined */
+@keyframes twist {
+    0%, 100% {
+      transform: rotateX(0deg);
+    }
+    25% {
+      transform: rotateX(20deg); /* Rotate to the left */
+    }
+    75% {
+      transform: rotateX(-20deg); /* Rotate to the right */
+    }
+  }
+/* Keyframes for turning left and right combined */
+@keyframes turn-left-right {
+    0%, 100% {
+      transform: rotate(0deg);
+    }
+    25% {
+      transform: rotate(-20deg); /* Rotate to the left */
+    }
+    75% {
+      transform: rotate(20deg); /* Rotate to the right */
+    }
+  }
+  
+  /* Spin animation class */
+  .spin-animation {
+    animation: spin 45s linear infinite;
+  }
+  
+  @keyframes spin {
+    0%{
+      transform: rotateY(0deg);
+    }
+    50% {
+      transform: rotateY(180deg);
+    }
+    100% {
+      transform: rotateY(360deg);
+    }
+  }
+  
+  /* Rainbow glow animation class */
+  .rainbow-glow-animation {
+    animation: rainbow-glow 11s linear infinite;
+  }
+  
+  @keyframes rainbow-glow {
+    0%, 12%, 24%, 50%, 62%, 74%, 86% { text-shadow: 0 0 15px #fff; } /* White glow at normal size */
+    6%, 18%, 37%, 43%, 55%, 68%, 80% { text-shadow: 0 0 32px #fff; } /* White glow at larger size */
+    88.5% { text-shadow: 0 0 68px red; }
+    91% { text-shadow: 0 0 48px orange; }
+    93% { text-shadow: 0 0 18px yellow; }
+    95% { text-shadow: 0 0 38px green; }
+    97% { text-shadow: 0 0 58px blue; }
+    98% { text-shadow: 0 0 48px indigo; }
+    98%, 100% { text-shadow: 0 0 68px violet; } /* End with violet */
+  }
+  /* Heart animations */
+  h1 strong::before,
+  h1 strong::after {
+    content: '❤️';
+    position: absolute;
+    bottom: 0;
+    opacity: 0;
+    animation: 
+      float-upwards 11s infinite ease-in-out,
+      pulse-glow 1s infinite ease-in-out;
+    text-shadow: 0 0 10px 0 rgba(255, 0, 0, 0); /* Initial glow */
+    filter: blur(0px); /* Initial blur state */
+    font-size:18px;
+  }
+  
+  h1 strong::after {
+    animation-delay: 1.5s; /* Delay for floating hearts */
+  }
+  
+  @keyframes float-upwards {
+    0%, 100% {
+      transform: translateZ(0);
+      bottom: 0;
+      opacity: 0;
+      text-shadow: 0 0 10px 0 rgba(255, 0, 0, 0);
+      filter: blur(0px);
+    }
+    50% {
+      transform: translateZ(50px);
+      opacity: 1;
+      text-shadow: 0 0 4 5px  rgba(255, 0, 0, 0.7); /* Intense red glow */
+      filter: blur(2px); /* Increased blur */
+    }
+    100% {
+      bottom: 100%;
+      opacity: 0;
+      text-shadow: 0 0 10px rgba(255, 0, 0, .9);
+      filter: blur(4px); /* Maximum blur */
+    }
+  }
+  
+  @keyframes pulse-glow {
+    0%, 100% {
+      text-shadow: 0 0 15px  rgba(255, 0, 0, 1);
+    }
+    50% {
+      text-shadow: 0 0 15px  rgba(255, 0, 0, 0.7);
+    }
+  }
+  /* Base styles for the animated element */
+.animated-element {
+    width: 100px;
+    height: 100px;
+    background-color: blue;
+    animation: rotate-3d 5s infinite linear;
+    filter: drop-shadow(5px 15px 10px black); /* Smaller and further down shadow */
+  }
+  
+  /* 3D Rotation Animation */
+  @keyframes rotate-3d {
+    0%,  100% {
+      transform: rotate3d(0, 1, 0, 0deg);
+    }
+    50% {
+      transform: rotate3d(0, 1, 0, 360deg);
+    }
+  }
+  
+  /* Blur Animation */
+  @keyframes blur-animation {
+    0%, 100% {
+      filter: blur(0px);
+    }
+    50% {
+      filter: blur(2px);
+    }
+  }
+  
+  /* Brightness Animation */
+  @keyframes brightness-animation {
+    0%, 100% {
+      filter: brightness(100%);
+    }
+    50% {
+      filter: brightness(50%);
+    }
+  }
+  
+  /* Contrast Animation */
+  @keyframes contrast-animation {
+    0%, 100% {
+      filter: contrast(100%);
+    }
+    50% {
+      filter: contrast(200%);
+    }
+  }
+  
+  /* Grayscale Animation */
+  @keyframes grayscale-animation {
+    0%, 100% {
+      filter: grayscale(0%);
+    }
+    50% {
+      filter: grayscale(100%);
+    }
+  }
+  
+  /* Hue-Rotate Animation */
+  @keyframes hue-rotate-animation {
+    0%, 50%, 100% {
+      filter: hue-rotate(0deg);
+    }
+   95% {
+      filter: hue-rotate(180deg);
+    }
+  }
+  
+  /* Invert Animation */
+  @keyframes invert-animation {
+    0%, 100% {
+      filter: invert(0%);
+    }
+    50% {
+      filter: invert(100%);
+    }
+  }
+  
+  /* Opacity Animation */
+  @keyframes opacity-animation {
+    0%, 100% {
+      filter: opacity(100%);
+    }
+    50% {
+      filter: opacity(50%);
+    }
+  }
+  
+  /* Saturate Animation */
+  @keyframes saturate-animation {
+    0%, 100% {
+      filter: saturate(100%);
+    }
+    50% {
+      filter: saturate(300%);
+    }
+  }
+  
+  /* Sepia Animation */
+  @keyframes sepia-animation {
+    0%, 100% {
+      filter: sepia(0%);
+    }
+    50% {
+      filter: sepia(100%);
+    }
+  }
+  
+  
