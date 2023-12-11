@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/ming-mind-web/static/css/main.a4f363ae.css",
-    "main.js": "/ming-mind-web/static/js/main.2f5b88c9.js",
+    "main.js": "/ming-mind-web/static/js/main.5e997c8f.js",
     "static/js/787.777cbd01.chunk.js": "/ming-mind-web/static/js/787.777cbd01.chunk.js",
     "index.html": "/ming-mind-web/index.html",
     "main.a4f363ae.css.map": "/ming-mind-web/static/css/main.a4f363ae.css.map",
-    "main.2f5b88c9.js.map": "/ming-mind-web/static/js/main.2f5b88c9.js.map",
+    "main.5e997c8f.js.map": "/ming-mind-web/static/js/main.5e997c8f.js.map",
     "787.777cbd01.chunk.js.map": "/ming-mind-web/static/js/787.777cbd01.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.a4f363ae.css",
-    "static/js/main.2f5b88c9.js"
+    "static/js/main.5e997c8f.js"
   ]
 }
