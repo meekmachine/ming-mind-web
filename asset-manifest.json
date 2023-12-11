@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/starter-project/static/css/main.a4f363ae.css",
-    "main.js": "/starter-project/static/js/main.d276f2d3.js",
-    "static/js/787.777cbd01.chunk.js": "/starter-project/static/js/787.777cbd01.chunk.js",
-    "index.html": "/starter-project/index.html",
-    "main.a4f363ae.css.map": "/starter-project/static/css/main.a4f363ae.css.map",
-    "main.d276f2d3.js.map": "/starter-project/static/js/main.d276f2d3.js.map",
-    "787.777cbd01.chunk.js.map": "/starter-project/static/js/787.777cbd01.chunk.js.map"
+    "main.css": "/ming-ming-web/static/css/main.a4f363ae.css",
+    "main.js": "/ming-ming-web/static/js/main.f78e1600.js",
+    "static/js/787.777cbd01.chunk.js": "/ming-ming-web/static/js/787.777cbd01.chunk.js",
+    "index.html": "/ming-ming-web/index.html",
+    "main.a4f363ae.css.map": "/ming-ming-web/static/css/main.a4f363ae.css.map",
+    "main.f78e1600.js.map": "/ming-ming-web/static/js/main.f78e1600.js.map",
+    "787.777cbd01.chunk.js.map": "/ming-ming-web/static/js/787.777cbd01.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.a4f363ae.css",
-    "static/js/main.d276f2d3.js"
+    "static/js/main.f78e1600.js"
   ]
 }
