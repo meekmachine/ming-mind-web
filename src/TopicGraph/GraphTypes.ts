@@ -3,7 +3,9 @@ export interface GraphNode {
     id: string;
     name: string;
     color: string;
+    average_toxicity_score: number; // Add this property
 }
+
 
 export interface GraphLink {
     source: string;

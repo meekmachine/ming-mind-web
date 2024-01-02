@@ -32,7 +32,7 @@ function FetchConversationModal({
 
   const handleNodeClick = async (nodeId: string) => {
     try {
-      const response = await axios.get(`http://localhost:8000/get-convo-by-id/${nodeId}`);
+      const response = await axios.get(`https://arcane-castle-52297-3d5535782e12.herokuapp.com/get-convo-by-id/${nodeId}`);
       const conversationData = response.data;
       const formattedConversation = formatConversation(conversationData);
       const plainTextConversation = conversationData.map((msg: { speaker: any; text: any; }) => `${msg.speaker}: ${msg.text}`).join('\n');
@@ -54,16 +54,37 @@ function FetchConversationModal({
       return `<p><span style="color: ${toxicColor}; ${attackStyle}"><b>${msg.speaker}:</b> ${msg.text}</span></p>`;
     }).join('');
   };
+  // Custom Vision UI Styles with full width and height
+  const visionUIStyles = {
+    modalContent: {
+      backgroundColor: '#333', // Dark background
+      color: 'white', // Light text color
+      width: '100vw', // Full viewport width
+      height: '100vh', // Full viewport height
+      margin: 0, // Remove margin
+      borderRadius: 0, // Remove border radius for full screen
+      maxW: '100vw', // Ensure max width is 100% of viewport
+      maxH: '100vh', // Ensure max height is 100% of viewport
+    },
+    header: {
+      borderBottom: '1px solid #444', // Subtle separation
+      paddingBottom: '0.5rem',
+    },
+    footer: {
+      borderTop: '1px solid #444',
+      paddingTop: '0.5rem',
+    },
+  };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} size="full">
       <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>Fetch Conversation</ModalHeader>
+      <ModalContent sx={visionUIStyles.modalContent}>
+        <ModalHeader sx={visionUIStyles.header}>Fetch Conversation</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <VStack spacing={4}>
-            <Text fontSize="md">``
+            <Text fontSize="md">
               This tool fetches conversations from the Conversations Gone Awry (CGA) corpus...
             </Text>
             <TopicGraph onFetchConversation={onFetchConversation} onNodeClick={handleNodeClick} />
