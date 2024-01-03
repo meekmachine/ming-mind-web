@@ -35,53 +35,61 @@ export const createNodeMaterial = (node: GraphNode): THREE.SpriteMaterial | unde
     return createTextMaterial(node.name, color);
 };
 
-export const spinGraph = (
-    graph: any,  // Using 'any' to bypass TypeScript checks
-    setIsNodeInteracted: MutableRefObject<boolean>
-) => {
-    let angle = 0;
-    const rotationSpeed = 0.002;
+export const focusCameraOnNode = (
+    camera: THREE.Camera, 
+    nodePosition: { x: number; y: number; z: number }, 
+    duration: number = 2000,
+    zoomDistance: number = 100
+): void => {
+    const startPosition = new THREE.Vector3().copy(camera.position);
+    const targetPosition = new THREE.Vector3(nodePosition.x, nodePosition.y, nodePosition.z + zoomDistance);
 
-    const rotate = () => {
-        if (graph.camera && graph.camera.position && !setIsNodeInteracted.current) {
+    const startTime = Date.now();
 
-            angle += rotationSpeed;
-            const camera = graph.camera as THREE.Camera;
-            camera.position.x = 1000 * Math.sin(angle);
-            camera.position.z = 1000 * Math.cos(angle);
-            camera.lookAt(new THREE.Vector3(0, 0, 0)); // Assuming looking at the center
-        }
-    };
-    return setInterval(rotate, 100);
-};
+    function animateCamera() {
+        const elapsedTime = Date.now() - startTime;
+        const fraction = elapsedTime / duration;
 
-export const setupNodeHover = (
-    graph: any, // Using 'any' to bypass TypeScript checks
-    setIsNodeInteracted: MutableRefObject<boolean>
-) => {
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-
-    window.addEventListener('mousemove', (event) => {
-        // Check if the camera and scene are defined
-        if (!graph.camera || !graph.scene) {
-            return;
-        }
-
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-
-        raycaster.setFromCamera(mouse, graph.camera as THREE.Camera);
-        const intersects = raycaster.intersectObjects(graph.scene.children);
-
-        if (intersects.length > 0) {
-            setIsNodeInteracted.current = true;
-            const intersectedNode = intersects[0].object as any as GraphNode;
-            // Implement logic for focusing on the node
+        if (fraction < 1 && camera) {
+            camera.position.lerpVectors(startPosition, targetPosition, fraction);
+            camera.lookAt(nodePosition.x, nodePosition.y, nodePosition.z);
+            requestAnimationFrame(animateCamera);
         } else {
-            setIsNodeInteracted.current = false;
+            camera.position.set(targetPosition.x, targetPosition.y, targetPosition.z);
+            camera.lookAt(nodePosition.x, nodePosition.y, nodePosition.z);
         }
-    });
+    }
+
+    animateCamera();
 };
 
-// ... other functions
+
+    export const spinGraph = (
+        graph: any,  // Using 'any' to bypass TypeScript checks for 3D force graph
+        setIsNodeInteracted: MutableRefObject<boolean>
+    ) => {
+        let angle = 0;
+        const rotationSpeed = 0.002;
+    
+        const rotate = () => {
+            if (!setIsNodeInteracted.current && graph.camera && graph.camera.position) {
+                angle += rotationSpeed;
+                const camera = graph.camera as any;
+    
+                // Adjust the radius and height as needed
+                const radius = 1000;
+                const height = 500;
+    
+                camera.position.x = radius * Math.sin(angle);
+                camera.position.z = radius * Math.cos(angle);
+                camera.position.y = height;
+    
+                camera.lookAt(new THREE.Vector3(0, 0, 0));
+                if (graph.renderer) {
+                    graph.renderer().render(graph.scene(), camera);
+                }
+            }
+        };
+    
+        return setInterval(rotate, 100);
+    };

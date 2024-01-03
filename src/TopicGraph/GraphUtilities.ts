@@ -3,7 +3,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { scaleLinear } from 'd3-scale';
 import { GraphData, GraphNode, GraphLink, FirestoreData } from './GraphTypes';
 
-export const processFirebaseDataToGraph = (data: FirestoreData): GraphData => {
+const processFirebaseDataToGraph = (data: FirestoreData): GraphData => {
     let nodes: GraphNode[] = [];
     let links: GraphLink[] = [];
 
@@ -11,17 +11,30 @@ export const processFirebaseDataToGraph = (data: FirestoreData): GraphData => {
         .domain([0, 1]) // Assuming toxicity ranges from 0 to 1
         .range(['green', 'red']); // Green (non-toxic) to red (toxic)
 
+    // Example positioning logic (modify as needed)
+    let positionIndex = 0;
+    const positionStep = 50;
+
     Object.entries(data).forEach(([topicId, topicData]) => {
         if (topicId === '-1') return;
 
         const topicName = topicData.topic_name || `Topic ${topicId}`;
         const averageToxicity = topicData.average_toxicity || 0;
 
+        // Assign positions (for example in a line or grid)
+        const x = positionIndex * positionStep;
+        const y = 0; // Adjust as needed
+        const z = 0; // Adjust as needed
+        positionIndex++;
+
         nodes.push({
             id: topicId,
             name: topicName,
             color: toxicityColorScale(averageToxicity),
-            average_toxicity_score: averageToxicity, // Add the average_toxicity_score
+            average_toxicity_score: averageToxicity,
+            x: x,
+            y: y,
+            z: z,
         });
 
         // Process links between topics
@@ -31,8 +44,8 @@ export const processFirebaseDataToGraph = (data: FirestoreData): GraphData => {
                 const edgeColor = toxicityColorScale((averageToxicity + targetToxicity) / 2);
 
                 links.push({
-                    source: topicId, // Use the id of the source node
-                    target: key, // Use the id of the target node
+                    source: topicId,
+                    target: key,
                     strength: typeof value === 'number' ? value : 0,
                     color: edgeColor,
                 });
@@ -81,42 +94,9 @@ async function fetchAndProcessConversationData(
     nodeId: string,
     rawData: FirestoreData
 ): Promise<{ newNodes: GraphNode[]; newLinks: GraphLink[] }> {
-    let newNodes: GraphNode[] = [];
-    let newLinks: GraphLink[] = [];
-
-    // Fetch all conversations for the node
-    const conversationSnapshot = await getDocs(collection(firestore, `topics1/${nodeId}/convosations`));
-
-    // Prepare batch requests for speakers in each conversation
-    const speakerRequests = conversationSnapshot.docs.map((doc) =>
-        getDocs(collection(firestore, `topics1/${nodeId}/convosations/${doc.id}/speakers`))
-    );
-
-    // Execute all speaker requests in parallel
-    const speakerSnapshots = await Promise.all(speakerRequests);
-
-    speakerSnapshots.forEach((speakersSnapshot, index) => {
-        const convId = conversationSnapshot.docs[index].id;
-        const emotions = speakersSnapshot.docs.map((doc) => doc.data().emoji);
-        const emotionLabel = emotions.join(' vs ');
-
-        newNodes.push({
-            id: `${nodeId}-conv-${convId}`,
-            name: emotionLabel,
-            color: 'white',
-            average_toxicity_score: 0, // You can set this to a value if needed
-        });
-
-        // Assigning a default link strength, can be adjusted as needed
-        newLinks.push({
-            source: nodeId,
-            target: `${nodeId}-conv-${convId}`,
-            strength: 1,
-            color: 'white',
-        });
-    });
-
-    return { newNodes, newLinks };
+    // Implementation of fetching and processing conversation data
+    // ...
+    return { newNodes: [], newLinks: [] };
 }
 
-export { toggleNodeExpansion, fetchAndProcessConversationData };
+export { toggleNodeExpansion, processFirebaseDataToGraph };

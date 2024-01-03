@@ -3,7 +3,7 @@ import ForceGraph3D from "3d-force-graph";
 import * as THREE from 'three';
 import { firestore } from './FirebaseSetup';
 import { toggleNodeExpansion, processFirebaseDataToGraph } from './GraphUtilities';
-import { createNodeMaterial } from './ThreeCustomElements';
+import { createNodeMaterial, focusCameraOnNode, spinGraph } from './ThreeCustomElements';
 import { getDocs, collection, QueryDocumentSnapshot } from 'firebase/firestore';
 import { GraphData, TopicData, FirestoreData, GraphNode } from './GraphTypes';
 
@@ -15,7 +15,7 @@ interface TopicGraphProps {
 const TopicGraph: React.FC<TopicGraphProps> = ({ onFetchConversation, onNodeClick }) => {
     const graphRef = useRef<HTMLDivElement>(null);
     const [graphData, setGraphData] = useState<GraphData>({ nodes: [], links: [] });
-    const [rawData, setRawData] = useState<FirestoreData>({}); // Added rawData state
+    const [rawData, setRawData] = useState<FirestoreData>({});
     const isNodeInteracted = useRef(false);
 
     useEffect(() => {
@@ -30,14 +30,14 @@ const TopicGraph: React.FC<TopicGraphProps> = ({ onFetchConversation, onNodeClic
             });
 
             setGraphData(processFirebaseDataToGraph(fetchedData));
-            setRawData(fetchedData); // Update rawData state
+            setRawData(fetchedData);
         };
 
         fetchData();
     }, []);
 
     useEffect(() => {
-        if (!graphRef.current || !graphData) return;
+        if (!graphRef.current || graphData.nodes.length === 0) return;
 
         const graph = ForceGraph3D()(graphRef.current)
             .graphData(graphData)
@@ -52,28 +52,31 @@ const TopicGraph: React.FC<TopicGraphProps> = ({ onFetchConversation, onNodeClic
                 isNodeInteracted.current = true;
             });
 
-        // Setup mouseover functionality
+        const spinInterval = spinGraph(graph, isNodeInteracted);
+
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
 
         const onMouseMove = (event) => {
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-
             raycaster.setFromCamera(mouse, graph.camera());
-            const intersects = raycaster.intersectObjects(graph.scene().children, true);
 
+            const intersects = raycaster.intersectObjects(graph.scene().children);
             if (intersects.length > 0) {
+                const intersectedNode = intersects[0].object;
+                focusCameraOnNode(graph.camera(), { x: intersectedNode.position.x, y: intersectedNode.position.y, z: intersectedNode.position.z }, 2000, 100);
                 isNodeInteracted.current = true;
             } else {
                 isNodeInteracted.current = false;
             }
         };
 
-        graphRef.current.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mousemove', onMouseMove);
 
         return () => {
-            graphRef.current.removeEventListener('mousemove', onMouseMove);
+            clearInterval(spinInterval);
+            window.removeEventListener('mousemove', onMouseMove);
         };
     }, [graphData, onFetchConversation, onNodeClick]);
 
