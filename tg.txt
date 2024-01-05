@@ -22,20 +22,23 @@ const GraphContainer = forwardRef<HTMLDivElement>((props, ref) => {
 });
 
 
-export default GraphContainer;// GraphTypes.ts
-export interface GraphNode {
+export default GraphContainer;export interface GraphNode {
     id: string;
     name: string;
     color: string;
-    average_toxicity_score: number; // Add this property
+    average_toxicity_score: number; 
+    x: number;  // X-coordinate of the node
+    y: number;  // Y-coordinate of the node
+    z: number;  // Z-coordinate of the node
+    // Add any other properties that GraphNode might have
 }
-
 
 export interface GraphLink {
     source: string;
     target: string;
     strength: number;
     color: string;
+    // Add any other properties that GraphLink might have
 }
 
 export interface GraphData {
@@ -55,7 +58,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { scaleLinear } from 'd3-scale';
 import { GraphData, GraphNode, GraphLink, FirestoreData } from './GraphTypes';
 
-export const processFirebaseDataToGraph = (data: FirestoreData): GraphData => {
+const processFirebaseDataToGraph = (data: FirestoreData): GraphData => {
     let nodes: GraphNode[] = [];
     let links: GraphLink[] = [];
 
@@ -63,17 +66,30 @@ export const processFirebaseDataToGraph = (data: FirestoreData): GraphData => {
         .domain([0, 1]) // Assuming toxicity ranges from 0 to 1
         .range(['green', 'red']); // Green (non-toxic) to red (toxic)
 
+    // Example positioning logic (modify as needed)
+    let positionIndex = 0;
+    const positionStep = 50;
+
     Object.entries(data).forEach(([topicId, topicData]) => {
         if (topicId === '-1') return;
 
         const topicName = topicData.topic_name || `Topic ${topicId}`;
         const averageToxicity = topicData.average_toxicity || 0;
 
+        // Assign positions (for example in a line or grid)
+        const x = positionIndex * positionStep;
+        const y = 0; // Adjust as needed
+        const z = 0; // Adjust as needed
+        positionIndex++;
+
         nodes.push({
             id: topicId,
             name: topicName,
             color: toxicityColorScale(averageToxicity),
-            average_toxicity_score: averageToxicity, // Add the average_toxicity_score
+            average_toxicity_score: averageToxicity,
+            x: x,
+            y: y,
+            z: z,
         });
 
         // Process links between topics
@@ -83,8 +99,8 @@ export const processFirebaseDataToGraph = (data: FirestoreData): GraphData => {
                 const edgeColor = toxicityColorScale((averageToxicity + targetToxicity) / 2);
 
                 links.push({
-                    source: topicId, // Use the id of the source node
-                    target: key, // Use the id of the target node
+                    source: topicId,
+                    target: key,
                     strength: typeof value === 'number' ? value : 0,
                     color: edgeColor,
                 });
@@ -133,72 +149,36 @@ async function fetchAndProcessConversationData(
     nodeId: string,
     rawData: FirestoreData
 ): Promise<{ newNodes: GraphNode[]; newLinks: GraphLink[] }> {
-    let newNodes: GraphNode[] = [];
-    let newLinks: GraphLink[] = [];
-
-    // Fetch all conversations for the node
-    const conversationSnapshot = await getDocs(collection(firestore, `topics1/${nodeId}/convosations`));
-
-    // Prepare batch requests for speakers in each conversation
-    const speakerRequests = conversationSnapshot.docs.map((doc) =>
-        getDocs(collection(firestore, `topics1/${nodeId}/convosations/${doc.id}/speakers`))
-    );
-
-    // Execute all speaker requests in parallel
-    const speakerSnapshots = await Promise.all(speakerRequests);
-
-    speakerSnapshots.forEach((speakersSnapshot, index) => {
-        const convId = conversationSnapshot.docs[index].id;
-        const emotions = speakersSnapshot.docs.map((doc) => doc.data().emoji);
-        const emotionLabel = emotions.join(' vs ');
-
-        newNodes.push({
-            id: `${nodeId}-conv-${convId}`,
-            name: emotionLabel,
-            color: 'white',
-            average_toxicity_score: 0, // You can set this to a value if needed
-        });
-
-        // Assigning a default link strength, can be adjusted as needed
-        newLinks.push({
-            source: nodeId,
-            target: `${nodeId}-conv-${convId}`,
-            strength: 1,
-            color: 'white',
-        });
-    });
-
-    return { newNodes, newLinks };
+    // Implementation of fetching and processing conversation data
+    // ...
+    return { newNodes: [], newLinks: [] };
 }
 
-export { toggleNodeExpansion, fetchAndProcessConversationData };
-import { SpriteMaterial, CanvasTexture, Camera, Vector3 } from 'three';
-import * as d3 from 'd3-scale';
-import { GraphNode } from './GraphTypes';
-import ForceGraph3D from "3d-force-graph";
+export { toggleNodeExpansion, processFirebaseDataToGraph };
+import * as THREE from 'three';
 import { MutableRefObject } from 'react';
+import { GraphNode } from './GraphTypes';
+import * as d3 from 'd3-scale';
 
-// Define the toxicityColorScale using D3
 const toxicityColorScale = d3.scaleLinear<string>()
-    .domain([0, .35])
+    .domain([0, 0.35])
     .range(['green', 'red']);
 
-export const createTextMaterial = (text: string, color: string, fontSize: string = '16px', fontFamily: string = 'Arial'): SpriteMaterial | undefined => {
+export const createTextMaterial = (text: string, color: string, fontSize: string = '16px', fontFamily: string = 'Arial'): THREE.SpriteMaterial | undefined => {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     if (context) {
         context.font = `${fontSize} ${fontFamily}`;
         const textMetrics = context.measureText(text);
 
-        // Adjust canvas size based on text size
         canvas.width = textMetrics.width + 10; // Add some padding
         canvas.height = parseInt(fontSize, 10) + 10; // Height based on font size plus padding
         context.fillStyle = color;
         context.font = `${fontSize} ${fontFamily}`; // Reset font after resizing canvas
         context.fillText(text, 5, parseInt(fontSize, 10)); // Start drawing from a small offset
 
-        const texture = new CanvasTexture(canvas);
-        return new SpriteMaterial({ 
+        const texture = new THREE.CanvasTexture(canvas);
+        return new THREE.SpriteMaterial({ 
             map: texture,
             transparent: true,
             opacity: 0.6
@@ -207,19 +187,19 @@ export const createTextMaterial = (text: string, color: string, fontSize: string
     return undefined;
 };
 
-export const createNodeMaterial = (node: GraphNode): SpriteMaterial | undefined => {
+export const createNodeMaterial = (node: GraphNode): THREE.SpriteMaterial | undefined => {
     const color = toxicityColorScale(node.average_toxicity_score); // Use average_toxicity_score
     return createTextMaterial(node.name, color);
 };
 
 export const focusCameraOnNode = (
-    camera: Camera, 
+    camera: THREE.Camera, 
     nodePosition: { x: number; y: number; z: number }, 
     duration: number = 2000,
     zoomDistance: number = 100
 ): void => {
-    const startPosition = new Vector3().copy(camera.position);
-    const targetPosition = new Vector3(nodePosition.x, nodePosition.y, nodePosition.z + zoomDistance);
+    const startPosition = new THREE.Vector3().copy(camera.position);
+    const targetPosition = new THREE.Vector3(nodePosition.x, nodePosition.y, nodePosition.z + zoomDistance);
 
     const startTime = Date.now();
 
@@ -227,7 +207,7 @@ export const focusCameraOnNode = (
         const elapsedTime = Date.now() - startTime;
         const fraction = elapsedTime / duration;
 
-        if (fraction < 1) {
+        if (fraction < 1 && camera) {
             camera.position.lerpVectors(startPosition, targetPosition, fraction);
             camera.lookAt(nodePosition.x, nodePosition.y, nodePosition.z);
             requestAnimationFrame(animateCamera);
@@ -240,49 +220,41 @@ export const focusCameraOnNode = (
     animateCamera();
 };
 
-// Function to create a spinning effect
-export const spinGraph = (
-    graph: typeof ForceGraph3D, 
-    setIsNodeInteracted: MutableRefObject<boolean>
-) => {
-    let angle = 0;
-    const rotationSpeed = 0.002; // Adjust as needed
 
-    const rotate = () => {
-        if (!setIsNodeInteracted.current) {
-            angle += rotationSpeed;
-            graph.cameraPosition(
-                { x: 1000 * Math.sin(angle), y: 0, z: 1000 * Math.cos(angle) }, // Orbit radius
-                undefined,
-                2000
-            );
-        }
-    };
-    return setInterval(rotate, 100);
-};
-
-// Function to handle node hover for zooming
-export const setupNodeHover = (
-    graph: typeof ForceGraph3D, 
-    setIsNodeInteracted: MutableRefObject<boolean>
-) => {
-    graph.onNodeHover((node: any) => { // 'any' can be replaced with a more specific type if available
-        if (node) {
-            setIsNodeInteracted.current = true;
-            focusCameraOnNode(graph.camera(), node, 1000, 100); // Adjust duration and zoom distance as needed
-        } else {
-            setIsNodeInteracted.current = false;
-        }
-    });
-};
-
-// ... [any additional functions or exports]
-import React, { useState, useEffect, useRef } from 'react';
-import ForceGraph3D from "3d-force-graph"
-import { Sprite } from 'three';
+    export const spinGraph = (
+        graph: any,  // Using 'any' to bypass TypeScript checks for 3D force graph
+        setIsNodeInteracted: MutableRefObject<boolean>
+    ) => {
+        let angle = 0;
+        const rotationSpeed = 0.002;
+    
+        const rotate = () => {
+            if (!setIsNodeInteracted.current && graph.camera && graph.camera.position) {
+                angle += rotationSpeed;
+                const camera = graph.camera as any;
+    
+                // Adjust the radius and height as needed
+                const radius = 1000;
+                const height = 500;
+    
+                camera.position.x = radius * Math.sin(angle);
+                camera.position.z = radius * Math.cos(angle);
+                camera.position.y = height;
+    
+                camera.lookAt(new THREE.Vector3(0, 0, 0));
+                if (graph.renderer) {
+                    graph.renderer().render(graph.scene(), camera);
+                }
+            }
+        };
+    
+        return setInterval(rotate, 100);
+    };import React, { useState, useEffect, useRef } from 'react';
+import ForceGraph3D from "3d-force-graph";
+import * as THREE from 'three';
 import { firestore } from './FirebaseSetup';
 import { toggleNodeExpansion, processFirebaseDataToGraph } from './GraphUtilities';
-import { createNodeMaterial, spinGraph, setupNodeHover } from './ThreeCustomElements';
+import { createNodeMaterial, focusCameraOnNode, spinGraph } from './ThreeCustomElements';
 import { getDocs, collection, QueryDocumentSnapshot } from 'firebase/firestore';
 import { GraphData, TopicData, FirestoreData, GraphNode } from './GraphTypes';
 
@@ -301,49 +273,61 @@ const TopicGraph: React.FC<TopicGraphProps> = ({ onFetchConversation, onNodeClic
         const fetchData = async () => {
             const querySnapshot = await getDocs(collection(firestore, "topics1"));
             let fetchedData: FirestoreData = {};
-    
+
             querySnapshot.forEach((doc: QueryDocumentSnapshot<TopicData>) => {
                 const topicId = doc.id;
                 const topicData = doc.data();
                 fetchedData[topicId] = topicData;
             });
-    
-            const processedGraphData = processFirebaseDataToGraph(fetchedData);
-            setGraphData(processedGraphData);
+
+            setGraphData(processFirebaseDataToGraph(fetchedData));
             setRawData(fetchedData);
         };
-    
+
         fetchData();
     }, []);
 
     useEffect(() => {
-        if (!graphRef.current || !graphData) return;
+        if (!graphRef.current || graphData.nodes.length === 0) return;
 
         const graph = ForceGraph3D()(graphRef.current)
             .graphData(graphData)
             .nodeThreeObject(node => {
-                const sprite = new Sprite(createNodeMaterial(node as GraphNode));
+                const sprite = new THREE.Sprite(createNodeMaterial(node as GraphNode));
                 sprite.scale.set(40, 20, 1);
                 return sprite;
             })
-            .linkColor(() => 'white')
             .onNodeClick((node: any) => {
                 const graphNode = node as GraphNode;
-                if (graphNode.id.includes('conv')) {
-                    onNodeClick(graphNode.id);
-                } else {
-                    toggleNodeExpansion(graphNode.id, graphData, setGraphData, rawData);
-                    isNodeInteracted.current = true;
-                }
+                toggleNodeExpansion(graphNode.id, graphData, setGraphData, rawData);
+                isNodeInteracted.current = true;
             });
 
-        // Setup spinning and hover functionality
         const spinInterval = spinGraph(graph, isNodeInteracted);
-        setupNodeHover(graph, isNodeInteracted);
 
-        // Cleanup on component unmount
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        const onMouseMove = (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, graph.camera());
+
+            const intersects = raycaster.intersectObjects(graph.scene().children);
+            if (intersects.length > 0) {
+                const intersectedNode = intersects[0].object;
+                focusCameraOnNode(graph.camera(), { x: intersectedNode.position.x, y: intersectedNode.position.y, z: intersectedNode.position.z }, 2000, 100);
+                isNodeInteracted.current = true;
+            } else {
+                isNodeInteracted.current = false;
+            }
+        };
+
+        window.addEventListener('mousemove', onMouseMove);
+
         return () => {
             clearInterval(spinInterval);
+            window.removeEventListener('mousemove', onMouseMove);
         };
     }, [graphData, onFetchConversation, onNodeClick]);
 
