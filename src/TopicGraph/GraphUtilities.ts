@@ -1,4 +1,4 @@
-import { firestore } from './FirebaseSetup';
+import { firestore } from './firebase/FirebaseSetup';
 import { collection, getDocs } from 'firebase/firestore';
 import { scaleLinear } from 'd3-scale';
 import { GraphData, GraphNode, GraphLink, FirestoreData } from './GraphTypes';
