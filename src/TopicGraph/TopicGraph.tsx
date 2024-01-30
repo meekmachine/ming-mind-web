@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import ForceGraph3D from "3d-force-graph";
 import * as THREE from 'three';
 import { firestore } from './firebase/FirebaseSetup';
-import { toggleNodeExpansion } from './';
+import { processFirebaseDataToGraph, toggleNodeExpansion } from './GraphUtilities';
 import { createNodeMaterial, focusCameraOnNode, spinGraph } from './ThreeCustomElements';
 import { getDocs, collection, QueryDocumentSnapshot } from 'firebase/firestore';
 import { GraphData, TopicData, FirestoreData, GraphNode } from './GraphTypes';
