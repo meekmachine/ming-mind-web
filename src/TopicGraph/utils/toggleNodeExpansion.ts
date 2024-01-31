@@ -1,6 +1,7 @@
 import { GraphData } from "react-force-graph-3d";
 import { FirestoreData } from "../GraphTypes";
 import { fetchAndProcessConversationData } from "../data/fetchAndProcessConverstionData";
+import exp from "constants";
 
 const toggleNodeExpansion = async (
     nodeId: string,
@@ -32,3 +33,4 @@ const toggleNodeExpansion = async (
 
     setGraphData({ nodes: newNodes, links: newLinks });
 };
+export { toggleNodeExpansion };
