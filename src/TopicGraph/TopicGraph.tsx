@@ -3,9 +3,11 @@ import ForceGraph3D from "3d-force-graph";
 import * as THREE from 'three';
 import { firestore } from './firebase/FirebaseSetup';
 import { processFirebaseDataToGraph, toggleNodeExpansion } from './GraphUtilities';
-import { createNodeMaterial, focusCameraOnNode, spinGraph } from './ThreeCustomElements';
 import { getDocs, collection, QueryDocumentSnapshot } from 'firebase/firestore';
 import { GraphData, TopicData, FirestoreData, GraphNode } from './GraphTypes';
+import { createNodeMaterial } from './utils/createNodeMaterial';
+import { spinGraph } from './utils/spinGraph';
+import { focusCameraOnNode } from './utils/focusCameraOnNode';
 
 interface TopicGraphProps {
     onFetchConversation: (conversation: { formattedText: string; plainText: string; json: any }) => void;
@@ -52,27 +54,27 @@ const TopicGraph: React.FC<TopicGraphProps> = ({ onFetchConversation, onNodeClic
                 isNodeInteracted.current = true;
             });
 
-        const spinInterval = spinGraph(graph, isNodeInteracted);
+            const spinInterval = spinGraph(graph, isNodeInteracted);
 
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
 
-        const onMouseMove = (event) => {
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-            raycaster.setFromCamera(mouse, graph.camera());
+            const onMouseMove = (event) => {
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+                raycaster.setFromCamera(mouse, graph.camera());
 
-            const intersects = raycaster.intersectObjects(graph.scene().children);
-            if (intersects.length > 0) {
-                const intersectedNode = intersects[0].object;
-                focusCameraOnNode(graph.camera(), { x: intersectedNode.position.x, y: intersectedNode.position.y, z: intersectedNode.position.z }, 2000, 100);
-                isNodeInteracted.current = true;
-            } else {
-                isNodeInteracted.current = false;
-            }
-        };
+                const intersects = raycaster.intersectObjects(graph.scene().children);
+                if (intersects.length > 0) {
+                    const intersectedNode = intersects[0].object;
+                    focusCameraOnNode(graph.camera(), { x: intersectedNode.position.x, y: intersectedNode.position.y, z: intersectedNode.position.z }, 2000, 100);
+                    isNodeInteracted.current = true;
+                } else {
+                    isNodeInteracted.current = false;
+                }
+            };
 
-        window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mousemove', onMouseMove);
 
         return () => {
             clearInterval(spinInterval);

@@ -1,20 +1,31 @@
 // Implements spinning animation for the graph
+import { MutableRefObject } from 'react';
 import * as THREE from 'three';
 
 export const spinGraph = (
-    graph: any, // Use the appropriate type for your graph
-    setIsNodeInteracted: React.MutableRefObject<boolean>
-): NodeJS.Timer => {
+    graph: any,  // Using 'any' to bypass TypeScript checks for 3D force graph
+    setIsNodeInteracted: MutableRefObject<boolean>
+) => {
     let angle = 0;
     const rotationSpeed = 0.002;
 
     const rotate = () => {
-        if (!setIsNodeInteracted.current) {
+        if (!setIsNodeInteracted.current && graph.camera && graph.camera.position) {
             angle += rotationSpeed;
-            const camera = graph.camera as THREE.PerspectiveCamera;
-            camera.position.x = Math.sin(angle) * 1000; // Example values
-            camera.position.z = Math.cos(angle) * 1000;
+            const camera = graph.camera as any;
+
+            // Adjust the radius and height as needed
+            const radius = 1000;
+            const height = 500;
+
+            camera.position.x = radius * Math.sin(angle);
+            camera.position.z = radius * Math.cos(angle);
+            camera.position.y = height;
+
             camera.lookAt(new THREE.Vector3(0, 0, 0));
+            if (graph.renderer) {
+                graph.renderer().render(graph.scene(), camera);
+            }
         }
     };
 

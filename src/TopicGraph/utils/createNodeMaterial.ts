@@ -4,7 +4,7 @@ import { GraphNode } from '../GraphTypes';
 import * as d3 from 'd3-scale';
 
 const toxicityColorScale = d3.scaleLinear<string>()
-    .domain([0, 1]) // Example domain
+    .domain([0, .4]) // Example domain
     .range(['green', 'red']); // Example range
 
 export const createNodeMaterial = (node: GraphNode): THREE.SpriteMaterial | undefined => {
