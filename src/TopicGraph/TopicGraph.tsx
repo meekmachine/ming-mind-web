@@ -1,49 +1,36 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import ForceGraph3D from '3d-force-graph';
-import * as THREE from 'three';
 import { useGraphData } from './hooks/useGraphData';
-import { firestore } from './firebase/FirebaseSetup';
-import { getDocs, collection } from 'firebase/firestore';
-import { GraphData, TopicData, FirestoreData, GraphNode } from './GraphTypes';
-import { createNodeMaterial } from './utils/createNodeMaterial';
-import { spinGraph } from './utils/spinGraph';
-import { focusCameraOnNode } from './utils/focusCameraOnNode';
-import { toggleNodeExpansion } from './GraphUtilities';
+import { useThreeSetup } from './hooks/useThreeSetup';
+import { toggleNodeExpansion } from './utils/toggleNodeExpansion';
 
-interface TopicGraphProps {
-    onFetchConversation: (conversation: { formattedText: string; plainText: string; json: any }) => void;
-    onNodeClick: (nodeId: string) => void;
-}
-
-const TopicGraph: React.FC<TopicGraphProps> = ({ onFetchConversation, onNodeClick }) => {
+const TopicGraph = ({ onFetchConversation, onNodeClick }) => {
     const graphRef = useRef<HTMLDivElement>(null);
-    const graphData = useGraphData(); // Hook to fetch and process graph data
-    const [isLoading, setIsLoading] = useState(false); // State to manage loading indicator for node expansion
+    const { graphData, isLoading, setIsLoading } = useGraphData();
+    const { setupThree, cleanupThree } = useThreeSetup(graphRef, isLoading);
 
     useEffect(() => {
-        if (!graphRef.current || graphData.nodes.length === 0) return;
+        if (!graphRef.current || !graphData.nodes.length) return;
 
         const graph = ForceGraph3D()(graphRef.current)
             .graphData(graphData)
-            .nodeThreeObject(node => {
-                const sprite = new THREE.Sprite(createNodeMaterial(node as GraphNode));
-                sprite.scale.set(40, 20, 1);
-                return sprite;
-            })
-            .onNodeClick((node: any) => {
-                setIsLoading(true); // Trigger loading state when node expansion starts
-                const graphNode = node as GraphNode;
-                toggleNodeExpansion(graphNode.id, graphData, setIsLoading); // Adjusted to manage loading state
+            .nodeThreeObject(node => setupThree.createNodeMaterial(node))
+            .onNodeClick(node => {
+                setIsLoading(true);
+                toggleNodeExpansion(node.id, graphData)
+                    .then(() => setIsLoading(false))
+                    .catch((error) => {
+                        console.error("Error expanding node:", error);
+                        setIsLoading(false);
+                    });
             });
 
-        const spinInterval = spinGraph(graph, graphRef); // Adjusted to use graphRef directly
+        // This could be a place to use setupThree for additional Three.js setup if needed
 
         return () => {
-            clearInterval(spinInterval);
+            cleanupThree(); // Cleanup Three.js setup on component unmount
         };
-    }, [graphData]);
-
-    // Additional effects or logic can be added here
+    }, [graphData, isLoading, setIsLoading, setupThree, cleanupThree]);
 
     return <div ref={graphRef} style={{ width: '100%', height: '100%', position: 'absolute' }} />;
 };
