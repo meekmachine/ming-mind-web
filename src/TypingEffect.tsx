@@ -11,8 +11,6 @@
       
           const typeCharacter = () => {
             if (charIndex < fullText.length) {
-                console.log(charIndex)
-                console.log(fullText.length)
               if (lastLength - charIndex > 20) {
                   clearInterval(typingInterval);
                   return;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Box, Text, Slide, Spinner, Button, useTheme } from '@chakra-ui/react';
+import { Box, Text, Slide, Spinner, Button, IconButton, VStack, useTheme, CloseButton } from '@chakra-ui/react';
 
 type AwryDescriberModalProps = {
   onClose: () => void;
@@ -11,7 +11,8 @@ const AwryDescriberModal = ({ onClose, conversationData }: AwryDescriberModalPro
   const [description, setDescription] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [autoOpen, setAutoOpen] = useState(false);
-  const [audio] = useState(new Audio('window.mp3'));
+  // Correctly reference the audio file from the public directory
+  const [audio] = useState(new Audio(process.env.PUBLIC_URL + '/Window.mp3'));
   const theme = useTheme();
 
   useEffect(() => {
@@ -29,7 +30,7 @@ const AwryDescriberModal = ({ onClose, conversationData }: AwryDescriberModalPro
 
   const playAudio = (start: number, duration: number) => {
     audio.currentTime = start;
-    audio.play();
+    audio.play().catch((error) => console.error("Audio play error:", error));
     if (duration) {
       setTimeout(() => {
         audio.pause();
@@ -41,7 +42,11 @@ const AwryDescriberModal = ({ onClose, conversationData }: AwryDescriberModalPro
     try {
       const formattedData = formatConversation(conversationData);
       const response = await axios.post('http://localhost:8000/awry-describer', { text: formattedData });
-      setDescription(response.data.result);
+      if (typeof response.data === 'string') {
+        setDescription(response.data);
+      } else {
+        setDescription(JSON.stringify(response.data));
+      }
       setLoading(false);
       setAutoOpen(true);
     } catch (error) {
@@ -61,8 +66,34 @@ const AwryDescriberModal = ({ onClose, conversationData }: AwryDescriberModalPro
   };
 
   return (
-    <Slide direction="bottom" in={autoOpen} style={{ zIndex: 99 }} unmountOnExit>
-      {/* Rest of the modal content */}
+    <Slide direction="bottom" in={autoOpen} style={{ zIndex: 10 }} unmountOnExit>
+      <Box
+        width="100%"
+        minHeight="200px"
+        bg="#4a4b52"
+        p={4}
+        boxShadow="md"
+        margin="0 auto"
+        display="flex"
+        flexDirection="column"
+        position="relative"
+      >
+        <CloseButton
+          aria-label="Close modal"
+          size="sm"
+          position="absolute"
+          right="8px"
+          top="8px"
+          onClick={closeAwryModal}
+        />
+        <VStack spacing={4} overflowY="auto" maxHeight="300px" width="100%">
+          {loading ? (
+            <Spinner />
+          ) : (
+            <Text fontSize="md" color="white">{description}</Text>
+          )}
+        </VStack>
+      </Box>
     </Slide>
   );
 };
