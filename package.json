@@ -1,7 +1,7 @@
 {
   "name": "multi-modal-mediator-for-interlocutory",
   "version": "0.11.11",
-  "homepage": "https://meekmachine.github.io/ming-mind-web/",
+  "homepage": "https://meekmachine.github.io/ming-mind-web",
   "dependencies": {
     "3d-force-graph": "^1.73.0",
     "@chakra-ui/core": "^0.8.0",
