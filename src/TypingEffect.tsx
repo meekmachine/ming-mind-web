@@ -39,7 +39,7 @@
             }
           };
       
-          const typingInterval = setInterval(typeCharacter, .50);
+          const typingInterval = setInterval(typeCharacter, .0050);
       
           return () => {
             clearInterval(typingInterval);

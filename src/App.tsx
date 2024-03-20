@@ -12,7 +12,7 @@ function App() {
       <CSSReset />
       <Router>
         <Routes>
-          <Route path="/" element={<FormPage />} />
+          <Route path="/ming-mind-web" element={<FormPage />} />
           <Route path="/response" element={<ResponsePage />} />
         </Routes>
       </Router>

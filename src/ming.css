@@ -11,7 +11,7 @@
     position: absolute;
     color: #fff; 
     transform-style: preserve-3d;/* Initial text color */
-    animation:  heart-animation 1s infinite ease-in-out 6s, rainbow-glow 11s linear infinite, spin 45s linear infinite;
+    animation:  heart-animation 1s infinite ease-in-out 6s, rainbow-glow 11s linear infinite, animate-blur 45s linear infinite, spin 65s linear infinite;
     /* text-shadow: 
     1px 1px 0px #000,
     2px 2px 0px #501414,
